@@ -1,0 +1,15 @@
+.ace_content {
+  background-color: #1A202C;
+}
+
+.ace_gutter-cell {
+  background-color: #1A202C;
+}
+
+.ace_variable {
+  color: #42a5f5 !important;
+}
+
+.ace_fold {
+  background-color: #42a5f5 !important;
+}

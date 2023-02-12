@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.react-flow__pane {
+  cursor: default;
+}
+
+.baseNode .react-flow__handle-connecting {
+  transition: 0.2s;
+  background: #ff6060;
+}
+
+.baseNode .react-flow__handle-valid {
+  transition: 0.2s;
+  background: #55dd99;
+}
