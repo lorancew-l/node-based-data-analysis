@@ -13,10 +13,12 @@ import {
   IOType,
   SortOrder,
   DataType,
+  ReplaceCondition,
 } from '../types';
 import { getFilter } from './filter';
 import { getColumnDataType } from './common';
 import { getSortFunction } from './sort';
+import { getReplaceFunction } from './replace';
 
 export const createNode = (nodeType: NodeType, position: BoardNode['position'] = { x: 0, y: 0 }): BoardNode => {
   const id = makeId();
@@ -30,6 +32,7 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         data: {
           inputType: [],
           outputType: [IOType.Table],
+          params: {},
           input: { columns: [], data: [] },
           output: { columns: [], data: [] },
         },
@@ -55,8 +58,8 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         data: {
           inputType: [IOType.Object],
           outputType: [IOType.Object],
-          input: {} as NodeIOObjectData,
-          output: {} as NodeIOObjectData,
+          input: { columns: [], data: {} },
+          output: { columns: [], data: {} },
         },
       };
     case NodeType.GroupBy:
@@ -69,7 +72,7 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
           outputType: [IOType.Object],
           params: {},
           input: { columns: [], data: [] },
-          output: {} as NodeIOObjectData,
+          output: { columns: [], data: {} },
         },
       };
     case NodeType.Aggregate:
@@ -81,8 +84,8 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
           inputType: [IOType.Object],
           outputType: [IOType.Object],
           params: {},
-          input: {} as NodeIOObjectData,
-          output: {} as NodeIOObjectData,
+          input: { columns: [], data: {} },
+          output: { columns: [], data: {} },
         },
       };
     case NodeType.RenameColumns:
@@ -174,6 +177,19 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
           output: { columns: [], data: [] },
         },
       };
+    case NodeType.Replace:
+      return {
+        id,
+        position,
+        type: NodeType.Replace,
+        data: {
+          inputType: [IOType.Table],
+          outputType: [IOType.Table],
+          input: { columns: [], data: [] },
+          output: { columns: [], data: [] },
+          params: {},
+        },
+      };
     default:
       return {} as BoardNode;
   }
@@ -192,7 +208,7 @@ const aggregationNameToFunction: Record<AggregateFunctionName, AggregateFunction
 
 const transformGroupBy = (data: NodeIOTableData, { column }: { column: number }) => {
   if (isUndefined(column)) {
-    return {} as NodeIOObjectData;
+    return { columns: [], data: {} };
   }
 
   const { columns, data: rows } = data;
@@ -209,7 +225,7 @@ const transformAggregation = (
   { func, column }: { func: AggregateFunctionName; column: number },
 ) => {
   if (!func || isUndefined(column)) {
-    return {} as NodeIOObjectData;
+    return { columns: [], data: {} };
   }
 
   const AggregateFunction = aggregationNameToFunction[func];
@@ -218,7 +234,7 @@ const transformAggregation = (
     result[key] = AggregateFunction(arrayToNumber(array.map((value) => value[column]))) ?? null;
 
     return result;
-  }, {} as Record<string, number | null>);
+  }, {} as Record<string, number>);
 
   return {
     columns,
@@ -268,6 +284,26 @@ const transformSort = (data: NodeIOTableData, { column, order }: { column: numbe
   };
 };
 
+const transformReplace = (
+  data: NodeIOTableData,
+  { column, condition, pattern, newValue }: { column: number; condition: ReplaceCondition; pattern: string; newValue: string },
+) => {
+  const replaceFn = getReplaceFunction(condition);
+
+  const newData = data.data.map((row) => {
+    const newRow = [...row];
+    const value = newRow[column];
+    newRow[column] = replaceFn(value, pattern, newValue);
+
+    return newRow;
+  });
+
+  return {
+    columns: data.columns,
+    data: newData,
+  };
+};
+
 export const transformNodeData = (nodeType: NodeType, data: NodeIOData, params: any) => {
   switch (nodeType) {
     case NodeType.GroupBy:
@@ -282,6 +318,8 @@ export const transformNodeData = (nodeType: NodeType, data: NodeIOData, params: 
       return transformFilter(data as NodeIOTableData, params);
     case NodeType.Sort:
       return transformSort(data as NodeIOTableData, params);
+    case NodeType.Replace:
+      return transformReplace(data as NodeIOTableData, params);
     default:
       return data;
   }

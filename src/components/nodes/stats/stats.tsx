@@ -1,5 +1,5 @@
 import { mean, min, max, sum } from 'lodash';
-import { memo, useState, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { makeStyles } from 'tss-react/mui';
 
 import { BoardNode, NodeData, NodeIOTableData } from '../../../types';
@@ -7,6 +7,8 @@ import { Select } from '../../select';
 import { median } from '../../../utils/common';
 import { Stat } from './stat';
 import { arrayToNumber } from '../../../utils/node';
+import { useAppDispatch } from '../../../store/hooks';
+import { updateNodeById } from '../../../store/reducers/board';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -25,9 +27,13 @@ type StatsComponentProps = {
 export const StatsComponent: React.FC<StatsComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
 
-  const [selectedColumn, setSelectedColumn] = useState<number | ''>(0);
+  const dispatch = useAppDispatch();
 
-  const { columns, data: dataset } = data.input;
+  const { input, params } = data;
+  const { columns, data: dataset } = input;
+
+  const selectedColumn = params.column ?? '';
+
   const columnsOptions = columns.map((column, index) => ({ value: index, label: column }));
 
   const stats = useMemo(() => {
@@ -43,10 +49,13 @@ export const StatsComponent: React.FC<StatsComponentProps> = memo(({ id, data })
       mean: mean(columnData),
       sum: sum(columnData),
       median: median(columnData),
+      count: columnData.length,
     };
   }, [dataset, selectedColumn]);
 
-  const handleColumnChange = (column: number | '') => setSelectedColumn(column);
+  const handleColumnChange = (column: number | '') => {
+    dispatch(updateNodeById({ id, data: { params: { column } } }));
+  };
 
   return (
     <div className={classes.container}>
@@ -61,6 +70,8 @@ export const StatsComponent: React.FC<StatsComponentProps> = memo(({ id, data })
       <Stat label="Median" value={stats.median} />
 
       <Stat label="Sum" value={stats.sum} />
+
+      <Stat label="Count" value={stats.count} />
     </div>
   );
 });

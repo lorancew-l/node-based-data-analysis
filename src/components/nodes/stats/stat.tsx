@@ -22,7 +22,7 @@ export const Stat: React.FC<StatProps> = ({ label, value }) => {
     <span className={classes.container}>
       <Typography variant="body2">{label}</Typography>
 
-      <Typography variant="body2">{value.toFixed(3)}</Typography>
+      <Typography variant="body2">{value?.toFixed(3)}</Typography>
     </span>
   );
 };

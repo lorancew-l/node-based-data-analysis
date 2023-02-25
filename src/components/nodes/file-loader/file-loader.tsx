@@ -1,5 +1,4 @@
-import { useState, memo } from 'react';
-import { NodeProps } from 'reactflow';
+import { memo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { parse } from 'papaparse';
 import CloseIcon from '@mui/icons-material/Close';
@@ -8,6 +7,7 @@ import { makeStyles } from 'tss-react/mui';
 
 import { useAppDispatch } from '../../../store/hooks';
 import { resetNodeData, updateDependents, updateNodeById } from '../../../store/reducers/board';
+import { BoardNode, NodeData, NodeIOTableData } from '../../../types';
 
 const useStyles = makeStyles()((theme) => ({
   dropzoneContainer: {
@@ -32,12 +32,17 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-type FileLoaderComponentProps = Pick<NodeProps, 'id'>;
+type FileLoaderComponentProps = {
+  id: BoardNode['id'];
+  data: NodeData<NodeIOTableData, NodeIOTableData>;
+};
 
-export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ id }) => {
+export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
 
-  const [fileName, setFileName] = useState<string>('');
+  const { params } = data ?? {};
+
+  const fileName = params?.fileName ?? '';
 
   const dispatch = useAppDispatch();
 
@@ -55,14 +60,12 @@ export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ i
         data: rows,
       };
 
-      dispatch(updateNodeById({ id, data: { input: tableData } }));
+      dispatch(updateNodeById({ id, data: { input: tableData, params: { fileName: file.name } } }));
       dispatch(updateDependents(id));
-      setFileName(file.name);
     };
   };
 
   const handleRemoveFile = () => {
-    setFileName('');
     dispatch(resetNodeData(id));
     dispatch(updateDependents(id));
   };

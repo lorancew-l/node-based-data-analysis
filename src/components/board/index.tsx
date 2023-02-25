@@ -39,6 +39,11 @@ export const Board = () => {
 
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
+  const dependencies = useAppSelector((state) => state.board.dependencies);
+
+  console.log('nodes', nodes);
+  console.log('edges', edges);
+  console.log('deps', dependencies);
 
   const dispatch = useAppDispatch();
 

@@ -10,3 +10,4 @@ export { Markdown } from './markdown';
 export { Filter } from './filter';
 export { LinePlot } from './line-plot';
 export { Sort } from './sort';
+export { Replace } from './replace';

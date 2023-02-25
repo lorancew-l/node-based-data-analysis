@@ -13,6 +13,7 @@ export enum NodeType {
   Filter = 'filter',
   LinePlot = 'linePlot',
   Sort = 'sort',
+  Replace = 'replace',
 }
 
 export type NodeIOObjectData<T extends object = object> = {
@@ -73,4 +74,8 @@ export enum Filter {
 export enum SortOrder {
   Ascending,
   Descending,
+}
+
+export enum ReplaceCondition {
+  Contains = 'contains',
 }

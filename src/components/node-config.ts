@@ -12,6 +12,7 @@ import {
   Filter,
   LinePlot,
   Sort,
+  Replace,
 } from './nodes';
 import { NodeEdge } from './edge';
 
@@ -28,6 +29,7 @@ export const nodeTypes = {
   [NodeType.Filter]: Filter,
   [NodeType.LinePlot]: LinePlot,
   [NodeType.Sort]: Sort,
+  [NodeType.Replace]: Replace,
 };
 
 export const edgeTypes = {
@@ -109,6 +111,14 @@ export const nodeConfig: NodeConfigItem[] = [
     group: NodeGroupName.Transform,
     title: 'Sort',
     description: 'Sort data based on selected column and order',
+    input: ['Table'],
+    output: ['Table'],
+  },
+  {
+    type: NodeType.Replace,
+    group: NodeGroupName.Transform,
+    title: 'Replace',
+    description: 'Replace value based on selected column and pattern',
     input: ['Table'],
     output: ['Table'],
   },

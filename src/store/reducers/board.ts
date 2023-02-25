@@ -4,7 +4,7 @@ import { v4 as makeId } from 'uuid';
 
 import { BoardNode } from '../../types';
 import { createNode, transformNodeData } from '../../utils/node';
-import { edges, nodes } from './demo';
+import { edges, nodes, dependencies } from './demo';
 
 type Dependencies = Record<string, string[]>;
 
@@ -17,7 +17,7 @@ type BoadrdState = {
 const initialState: BoadrdState = {
   nodes: nodes,
   edges: edges,
-  dependencies: {},
+  dependencies: dependencies,
 };
 
 export const boardSlice = createSlice({
