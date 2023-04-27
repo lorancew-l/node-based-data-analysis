@@ -5,27 +5,34 @@ import { selectSelectedNodeData } from '../../store/selectors/nodes-secector';
 import { OutputTable } from './table';
 import { isTableData } from '../../utils/common';
 import { ObjectViewer } from './object-viewer';
+import { ResizeHandle } from './resize-handle';
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles<{ height: number }>()((theme, { height }) => ({
   container: {
-    height: '35%',
-    borderTop: `1px solid ${theme.palette.primary.main}`,
+    width: '100%',
+    height,
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing(1, 0, 1, 1),
   },
 }));
 
-export const Output = () => {
-  const { classes } = useStyles();
+type OutputProps = {
+  height: number;
+  setHeight(height: number): void;
+};
+
+export const Output: React.FC<OutputProps> = ({ height, setHeight }) => {
+  const { classes } = useStyles({ height });
 
   const selectedNodeData = useSelector(selectSelectedNodeData);
   const data = selectedNodeData?.output;
 
-  if (!data?.columns) {
-    return <div className={classes.container} />;
-  }
-
   return (
-    <div className={classes.container}>{isTableData(data) ? <OutputTable data={data} /> : <ObjectViewer data={data.data} />}</div>
+    <div>
+      <ResizeHandle setHeight={setHeight} />
+      <div className={classes.container}>
+        {!data?.columns ? null : <>{isTableData(data) ? <OutputTable data={data} /> : <ObjectViewer data={data.data} />}</>}
+      </div>
+    </div>
   );
 };
