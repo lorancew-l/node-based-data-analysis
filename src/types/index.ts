@@ -1,4 +1,4 @@
-import { Node } from 'reactflow';
+import { Edge, Node, Viewport } from 'reactflow';
 
 export enum NodeType {
   FileLoader = 'fileLoader',
@@ -79,3 +79,14 @@ export enum SortOrder {
 export enum ReplaceCondition {
   Contains = 'contains',
 }
+
+export type Dependencies = Record<BoardNode['id'], BoardNode['id'][]>;
+
+export type SavedAppState = {
+  reactFlow: {
+    nodes: BoardNode[];
+    edges: Edge[];
+    viewport: Viewport;
+  };
+  dependencies: Dependencies;
+};

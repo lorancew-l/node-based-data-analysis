@@ -1,6 +1,7 @@
-import { isArray, isNaN } from 'lodash';
+import { isArray, isEmpty, isNaN } from 'lodash';
 
-import { NodeIOData, NodeIOTableData, DataType } from '../types';
+import { NodeIOData, NodeIOTableData, DataType, Dependencies, BoardNode } from '../types';
+import { dependencies } from '../store/reducers/demo';
 
 export const isTableData = (data?: NodeIOData): data is NodeIOTableData => isArray(data.data);
 
@@ -39,4 +40,25 @@ export const getColumnDataType = (data: NodeIOTableData['data'], columnIndex: nu
   );
 
   return numberCount > stringCount ? DataType.Number : DataType.String;
+};
+
+export const getNodeAllDependencies = (id: BoardNode['id'], dependencies: Dependencies) => {
+  const nodeDependencies: BoardNode['id'][] = [];
+
+  const getDependenciesRecursive = (id: BoardNode['id']) => {
+    const subnodeDependencies = dependencies[id];
+
+    if (!subnodeDependencies) {
+      return;
+    }
+
+    subnodeDependencies.forEach((dependency) => {
+      nodeDependencies.push(dependency);
+      getDependenciesRecursive(dependency);
+    });
+  };
+
+  getDependenciesRecursive(id);
+
+  return nodeDependencies;
 };

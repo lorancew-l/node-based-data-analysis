@@ -7,4 +7,8 @@ export const selectEdges = (state: AppState) => state.board.edges;
 
 export const selectSelectedNodeData = (state: AppState) => state.board.nodes.find(({ selected }) => selected)?.data;
 
-export const getNodeById = (nodeId: BoardNode['id']) => (state: AppState) => state.board.nodes.find(({ id }) => id === nodeId);
+export const getNodeDependents = (nodeId: BoardNode['id']) => (state: AppState) => {
+  const nodeDependencies = state.board.dependencies[nodeId];
+
+  return nodeDependencies;
+};

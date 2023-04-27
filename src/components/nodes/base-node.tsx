@@ -3,10 +3,11 @@ import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { makeStyles } from 'tss-react/mui';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppStore } from '../../store/hooks';
 import { removeNode } from '../../store/reducers/board';
 import Typography from '@mui/material/Typography';
-import { BoardNode, NodeData } from '../../types';
+import { NodeData } from '../../types';
+import { getNodeAllDependencies } from '../../utils/common';
 
 const useStyles = makeStyles<{ selected: boolean }>()((theme, { selected }) => ({
   container: {
@@ -71,6 +72,8 @@ export const BaseNode: React.FC<BaseNodeProps> = ({ id, title, children, selecte
   const dispatch = useAppDispatch();
   const { getNodes } = useReactFlow<NodeData>();
 
+  const { getState } = useAppStore();
+
   const handleRemove = () => {
     dispatch(removeNode(id));
   };
@@ -78,10 +81,18 @@ export const BaseNode: React.FC<BaseNodeProps> = ({ id, title, children, selecte
   const isValidConnection = (connection: Connection) => {
     const nodes = getNodes();
 
+    const { board } = getState();
+
     const source = nodes.find(({ id }) => id === connection.source);
     const target = nodes.find(({ id }) => id === connection.target);
 
-    return source.data.outputType.some((nodeType) => target.data.inputType.includes(nodeType));
+    const targetDependencies = getNodeAllDependencies(target.id, board.dependencies);
+
+    const isDifferentNodes = source !== target;
+    const isCycleDependency = targetDependencies.includes(source.id);
+    const isTypeMatches = source.data.outputType.some((nodeType) => target.data.inputType.includes(nodeType));
+
+    return isDifferentNodes && !isCycleDependency && isTypeMatches;
   };
 
   return (

@@ -2,11 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { applyNodeChanges, NodeChange, Edge, EdgeChange, applyEdgeChanges, Connection, addEdge } from 'reactflow';
 import { v4 as makeId } from 'uuid';
 
-import { BoardNode } from '../../types';
+import { BoardNode, Dependencies, SavedAppState } from '../../types';
 import { createNode, transformNodeData } from '../../utils/node';
 import { edges, nodes, dependencies } from './demo';
-
-type Dependencies = Record<string, string[]>;
 
 type BoadrdState = {
   nodes: BoardNode[];
@@ -15,9 +13,9 @@ type BoadrdState = {
 };
 
 const initialState: BoadrdState = {
-  nodes: nodes,
-  edges: edges,
-  dependencies: dependencies,
+  nodes: [],
+  edges: [],
+  dependencies: {},
 };
 
 export const boardSlice = createSlice({
@@ -94,6 +92,13 @@ export const boardSlice = createSlice({
 
       update(source);
     },
+    reset: (state, action: PayloadAction<SavedAppState>) => {
+      const { dependencies, reactFlow } = action.payload;
+
+      state.nodes = reactFlow.nodes;
+      state.edges = reactFlow.edges;
+      state.dependencies = dependencies;
+    },
   },
 });
 
@@ -108,4 +113,5 @@ export const {
   updateDependents,
   removeEdge,
   resetNodeData,
+  reset,
 } = boardSlice.actions;
