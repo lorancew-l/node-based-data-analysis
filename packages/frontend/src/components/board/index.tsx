@@ -58,8 +58,6 @@ export const Board: React.FC<BoardProps> = ({ height }) => {
     dispatch(updateDependents(connection.source));
   }, []);
 
-  console.log(edges);
-
   return (
     <div className={classes.container}>
       <ReactFlow

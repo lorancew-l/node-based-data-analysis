@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useLayoutEffect, useRef } from 'react';
 import { ReactFlowProvider } from 'reactflow';
 import { makeStyles } from 'tss-react/mui';
 
@@ -7,6 +7,7 @@ import { Output } from './components/output';
 import { AddBlockButton } from './components/add-block-dialog/add-block-button';
 import { SaveButton } from './components/save-dialog/save-button';
 import { RendererContextProvider } from './components/renderer-context';
+import { TopBar } from './components/top-bar/top-bar';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -32,16 +33,25 @@ const useStyles = makeStyles()((theme) => ({
 export const App = () => {
   const { classes } = useStyles();
 
-  const [height, setHeight] = useState<number>(250);
+  const [outputHeight, setOutputHeight] = useState<number>(250);
+
+  const [topBar, setTopBar] = useState<number>(0);
+  const headerRef = useRef<HTMLElement>();
+
+  useLayoutEffect(() => {
+    const { height } = headerRef.current.getBoundingClientRect();
+    setTopBar(height);
+  }, []);
 
   return (
     <main className={classes.container}>
       <RendererContextProvider>
         <ReactFlowProvider>
+          <TopBar ref={headerRef} />
           <AddBlockButton className={classes.addBlockButton} />
           <SaveButton className={classes.saveButtonGroup} />
-          <Board height={`calc(100vh - ${height}px)`} />
-          <Output height={height} setHeight={setHeight} />
+          <Board height={`calc(100vh - ${outputHeight + topBar}px)`} />
+          <Output height={outputHeight} setHeight={setOutputHeight} />
         </ReactFlowProvider>
       </RendererContextProvider>
     </main>
