@@ -1,7 +1,6 @@
-import { isArray, isEmpty, isNaN } from 'lodash';
+import { isArray, isNaN } from 'lodash';
 
 import { NodeIOData, NodeIOTableData, DataType, Dependencies, BoardNode } from '../types';
-import { dependencies } from '../store/reducers/demo';
 
 export const isTableData = (data?: NodeIOData): data is NodeIOTableData => isArray(data.data);
 

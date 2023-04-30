@@ -1,4 +1,4 @@
-import { store, rootReducer } from './index';
+import { store, rootReducer } from './store';
 
 export type AppStore = typeof store;
 export type AppDispatch = AppStore['dispatch'];
