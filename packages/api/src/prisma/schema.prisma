@@ -16,7 +16,7 @@ model User {
 
   firstName String
 
-  lastName String?
+  lastName String
 
   Project Project[]
 
@@ -31,6 +31,14 @@ model Project {
   description String?
 
   user User @relation(fields: [userId], references: [id])
+
+  data Json
+
+  published Boolean @default(false)
+
+  created_at DateTime @default(now())
+
+  updated_at DateTime @updatedAt
 
   userId String
 }

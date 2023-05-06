@@ -1,9 +1,10 @@
-import { Controller, Post, Body, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UnauthorizedException, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInUserDto, SignUpUserDto } from './dto';
 import { AccessGuard, RefreshGuard } from './guards';
-import { User, UserId } from './decorators';
+import { GetUser, GetUserId } from './decorators';
 import { JwtPayloadWithRefreshToken } from './types';
+import { EmailConstraintError, InvalidCredentials, InvalidToken } from './exceptions';
 
 @Controller('auth')
 export class AuthController {
@@ -14,35 +15,45 @@ export class AuthController {
     try {
       return await this.authService.signUp(user);
     } catch (error) {
-      console.error('Error', error);
-      throw new ForbiddenException('Credentials incorrect');
+      if (error instanceof EmailConstraintError) {
+        throw new UnauthorizedException(error.message);
+      }
     }
   }
 
   @Post('signin')
+  @HttpCode(200)
   async signIn(@Body() user: SignInUserDto) {
-    return this.authService.signIn(user);
+    try {
+      return await this.authService.signIn(user);
+    } catch (error) {
+      if (error instanceof InvalidCredentials) {
+        throw new UnauthorizedException(error.message);
+      }
+    }
   }
 
   @UseGuards(AccessGuard)
   @Post('logout')
-  async logout(@UserId() userId: string) {
+  @HttpCode(200)
+  async logout(@GetUserId() userId: string) {
     try {
       await this.authService.logout(userId);
     } catch (error) {
-      console.error('Error', error);
-      throw new ForbiddenException('Credentials incorrect');
+      throw new UnauthorizedException('Credentials incorrect');
     }
   }
 
   @UseGuards(RefreshGuard)
   @Post('refresh')
-  async refreshTokens(@User() user: JwtPayloadWithRefreshToken) {
+  @HttpCode(200)
+  async refreshTokens(@GetUser() user: JwtPayloadWithRefreshToken) {
     try {
-      await this.authService.refreshTokens(user);
+      return await this.authService.refreshTokens(user);
     } catch (error) {
-      console.error('Error', error);
-      throw new ForbiddenException('Credentials incorrect');
+      if (error instanceof InvalidToken) {
+        throw new UnauthorizedException(error.message);
+      }
     }
   }
 }

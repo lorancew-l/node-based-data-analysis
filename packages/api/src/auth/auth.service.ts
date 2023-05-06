@@ -1,9 +1,12 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
+import { omit } from 'lodash';
 import * as bcrypt from 'bcrypt';
 import { DatabaseService } from 'src/database/database.service';
 import { SignInUserDto, SignUpUserDto } from './dto';
+import { EmailConstraintError, InvalidCredentials, InvalidToken } from './exceptions';
 
 @Injectable()
 export class AuthService {
@@ -26,30 +29,38 @@ export class AuthService {
   async signUp(userData: SignUpUserDto) {
     const hash = await bcrypt.hash(userData.password, this.salt);
 
-    const { id } = await this.databaseService.user.create({
-      data: {
-        ...userData,
-        password: hash,
-      },
-    });
+    const user = await this.databaseService.user
+      .create({
+        data: {
+          ...userData,
+          password: hash,
+        },
+      })
+      .catch(() => {
+        throw new EmailConstraintError();
+      });
 
-    return this.getTokens(id);
+    return this.getTokens(user);
   }
 
   async signIn({ email, password }: SignInUserDto) {
-    const user = await this.databaseService.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await this.databaseService.user
+      .findUniqueOrThrow({
+        where: {
+          email,
+        },
+      })
+      .catch(() => {
+        throw new InvalidCredentials();
+      });
 
     const isPasswordMatches = await bcrypt.compare(password, user?.password);
 
     if (!isPasswordMatches) {
-      throw new ForbiddenException();
+      throw new InvalidCredentials();
     }
 
-    return this.getTokens(user.id);
+    return this.getTokens(user);
   }
 
   async logout(userId: string) {
@@ -60,48 +71,44 @@ export class AuthService {
     });
   }
 
-  async refreshTokens({ userId, refresh_token }: { userId: string; refresh_token: string }) {
+  async refreshTokens(user: User & { refresh_token: string }) {
     const { token: savedUserToken } = await this.databaseService.token.findUniqueOrThrow({
-      where: { userId },
+      where: { userId: user.id },
       select: { token: true },
     });
 
-    const isTokenMatches = savedUserToken === refresh_token;
+    const isTokenMatches = savedUserToken === user.refresh_token;
 
     if (isTokenMatches) {
-      return this.getTokens(userId);
+      return this.getTokens(user);
     }
 
-    throw new ForbiddenException();
+    throw new InvalidToken();
   }
 
-  private async getTokens(userId: string) {
+  private async getTokens(user: User) {
+    const payload = omit(user, 'password');
+
     const [access_token, refresh_token] = await Promise.all([
-      this.jwtService.signAsync(
-        { userId },
-        {
-          expiresIn: this.jwtAccessExpireTime,
-          secret: this.jwtAccessSecret,
-        },
-      ),
-      this.jwtService.signAsync(
-        { userId },
-        {
-          expiresIn: this.jwtRefreshExpireTime,
-          secret: this.jwtRefreshSecret,
-        },
-      ),
+      this.jwtService.signAsync(payload, {
+        expiresIn: this.jwtAccessExpireTime,
+        secret: this.jwtAccessSecret,
+      }),
+      this.jwtService.signAsync(payload, {
+        expiresIn: this.jwtRefreshExpireTime,
+        secret: this.jwtRefreshSecret,
+      }),
     ]);
 
     await this.databaseService.token.upsert({
       where: {
-        userId,
+        userId: user.id,
       },
       update: {
         token: refresh_token,
       },
       create: {
-        userId,
+        userId: user.id,
         token: refresh_token,
       },
     });

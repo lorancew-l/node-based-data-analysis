@@ -1,13 +1,14 @@
-import { makeStyles } from 'tss-react/mui';
-import WidgetsIcon from '@mui/icons-material/Widgets';
+import { useState } from 'react';
 import { Tooltip, IconButton } from '@mui/material';
+import WidgetsIcon from '@mui/icons-material/Widgets';
 import { useReactFlow } from 'reactflow';
+import { makeStyles } from 'tss-react/mui';
 
-import { useAppStore } from '../../../store/hooks';
+import { useAppStore, useAppDispatch, reset } from '../../../store';
 import { SavedAppState } from '../../../types';
-import { reset } from '../../../store/reducers/board';
-import { useAppDispatch } from '../../../store/hooks';
 import { Menu } from '../../../components';
+import { useUser } from '../../../auth-context';
+import { SaveProjectDialog } from './save-project-dialog';
 
 const useStyles = makeStyles()(() => ({
   iconButton: {
@@ -18,14 +19,8 @@ const useStyles = makeStyles()(() => ({
 enum FileOption {
   Export,
   Load,
-  Share,
+  Save,
 }
-
-const fileOptions = [
-  { label: 'Экспортировать', value: FileOption.Export },
-  { label: 'Загрузить', value: FileOption.Load },
-  { label: 'Поделиться', value: FileOption.Export },
-];
 
 type FileOptionsProps = {
   className?: string;
@@ -39,15 +34,28 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
 
   const dispatch = useAppDispatch();
 
-  const handleExport = async () => {
+  const user = useUser();
+
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+
+  const fileOptions = [
+    { label: 'Экспортировать', value: FileOption.Export },
+    { label: 'Загрузить', value: FileOption.Load },
+    ...(user ? [{ label: 'Сохранить', value: FileOption.Save }] : []),
+  ];
+
+  const getAppState = () => {
     const reactFlowData = reactFlowInstance.toObject();
     const dependencies = store.getState().board.dependencies;
 
-    const dataToSave = JSON.stringify({
+    return {
       reactFlow: reactFlowData,
       dependencies,
-    });
+    } as SavedAppState;
+  };
 
+  const handleExport = async () => {
+    const dataToSave = JSON.stringify(getAppState());
     const fileToSave = new Blob([dataToSave], { type: 'application/json' });
 
     // @ts-ignore
@@ -72,6 +80,10 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
     reactFlowInstance.setViewport(savedAppState.reactFlow.viewport);
   };
 
+  const handleOpenSaveDialog = () => setIsSaveDialogOpen(true);
+
+  const handleCloseSaveDialog = () => setIsSaveDialogOpen(false);
+
   const handleOptionSelect = (option: FileOption) => {
     switch (option) {
       case FileOption.Export:
@@ -80,7 +92,8 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
       case FileOption.Load:
         handleLoad();
         break;
-      case FileOption.Share:
+      case FileOption.Save:
+        handleOpenSaveDialog();
         break;
       default:
         break;
@@ -88,16 +101,20 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
   };
 
   return (
-    <Menu
-      options={fileOptions}
-      onSelect={handleOptionSelect}
-      renderTrigger={(onClick) => (
-        <Tooltip title="Файл">
-          <IconButton className={cx(classes.iconButton, className)} onClick={onClick}>
-            <WidgetsIcon color="primary" />
-          </IconButton>
-        </Tooltip>
-      )}
-    ></Menu>
+    <>
+      <Menu
+        options={fileOptions}
+        onSelect={handleOptionSelect}
+        renderTrigger={(onClick) => (
+          <Tooltip title="Файл">
+            <IconButton className={cx(classes.iconButton, className)} onClick={onClick}>
+              <WidgetsIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        )}
+      />
+
+      <SaveProjectDialog isOpen={isSaveDialogOpen} onClose={handleCloseSaveDialog} getData={getAppState} />
+    </>
   );
 };

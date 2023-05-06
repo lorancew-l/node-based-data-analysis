@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { JwtPayloadWithRefreshToken } from '../types';
 
-export const User = createParamDecorator(
+export const GetUser = createParamDecorator(
   (data: keyof JwtPayloadWithRefreshToken | undefined, context: ExecutionContext): JwtPayloadWithRefreshToken => {
     const request = context.switchToHttp().getRequest();
 

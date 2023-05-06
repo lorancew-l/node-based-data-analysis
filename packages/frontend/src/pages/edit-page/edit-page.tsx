@@ -1,5 +1,6 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { ReactFlowProvider } from 'reactflow';
+import { useParams } from 'react-router';
 import { makeStyles } from 'tss-react/mui';
 
 import { Board } from './board';
@@ -7,6 +8,7 @@ import { Output } from './output';
 import { RendererContextProvider } from './renderer-context';
 import { TopBar } from './top-bar/top-bar';
 import { AddBlockButton } from './add-block-dialog/add-block-button';
+import { useLoadProject } from './use-load-project';
 
 const useStyles = makeStyles<{ topBarHeight: number }>()((theme, { topBarHeight }) => ({
   container: {
@@ -23,13 +25,17 @@ const useStyles = makeStyles<{ topBarHeight: number }>()((theme, { topBarHeight 
   },
 }));
 
-export const EditPage = () => {
+const EditPageComponent = () => {
   const [outputHeight, setOutputHeight] = useState<number>(250);
 
   const [topBarHeight, setTopBarHeight] = useState<number>(0);
   const headerRef = useRef<HTMLElement>();
 
   const { classes } = useStyles({ topBarHeight });
+
+  const { projectId } = useParams();
+
+  const { isLoading } = useLoadProject(projectId);
 
   useLayoutEffect(() => {
     const { height } = headerRef.current.getBoundingClientRect();
@@ -39,13 +45,19 @@ export const EditPage = () => {
   return (
     <main className={classes.container}>
       <RendererContextProvider>
-        <ReactFlowProvider>
-          <TopBar ref={headerRef} />
-          <AddBlockButton className={classes.addBlockButton} />
-          <Board height={`calc(100vh - ${outputHeight + topBarHeight}px)`} />
-          <Output height={outputHeight} setHeight={setOutputHeight} />
-        </ReactFlowProvider>
+        <TopBar ref={headerRef} />
+        <AddBlockButton className={classes.addBlockButton} />
+        <Board height={`calc(100vh - ${outputHeight + topBarHeight}px)`} />
+        <Output height={outputHeight} setHeight={setOutputHeight} />
       </RendererContextProvider>
     </main>
+  );
+};
+
+export const EditPage = () => {
+  return (
+    <ReactFlowProvider>
+      <EditPageComponent />
+    </ReactFlowProvider>
   );
 };

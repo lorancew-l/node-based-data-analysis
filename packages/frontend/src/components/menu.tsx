@@ -47,7 +47,7 @@ export const Menu = <T extends string | number>({ options, onSelect, renderTrigg
           const value = isString(option) ? (option as T) : option.value;
 
           return (
-            <MenuItem key={value} onClick={() => handleMenuOptionClick(value)}>
+            <MenuItem key={`${value}${label}`} onClick={() => handleMenuOptionClick(value)}>
               <Typography>{label}</Typography>
             </MenuItem>
           );

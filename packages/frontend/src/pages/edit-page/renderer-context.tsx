@@ -7,7 +7,7 @@ const rendererContext = createContext<RendererContextValue>(null);
 export const useRendererContext = () => useContext(rendererContext);
 
 type RendererContextProviderProps = {
-  children: React.ReactElement;
+  children: React.ReactElement[];
 };
 
 export const RendererContextProvider: React.FC<RendererContextProviderProps> = ({ children }) => {

@@ -16,15 +16,13 @@
     "noEmit": true,
     "strictNullChecks": false
   },
+  "files": [],
   "references": [
     {
       "path": "./packages/frontend"
     },
     {
       "path": "./packages/api"
-    },
-    {
-      "path": "./packages/shared"
     }
   ]
 }
