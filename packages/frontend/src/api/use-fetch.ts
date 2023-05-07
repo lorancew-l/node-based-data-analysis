@@ -38,8 +38,6 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
 
         let response = await getFetchQuery();
 
-        console.log('response', response);
-
         if (withAuth && !isTriedRefresh.current && response.status === 401) {
           isTriedRefresh.current = true;
           token = await refreshTokens();
@@ -57,6 +55,7 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
         onSuccess?.(data);
         setData(data);
       } catch (error) {
+        console.log('error', error);
         onError?.(error);
         setError(error);
       } finally {

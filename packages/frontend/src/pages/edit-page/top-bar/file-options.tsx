@@ -4,11 +4,16 @@ import WidgetsIcon from '@mui/icons-material/Widgets';
 import { useReactFlow } from 'reactflow';
 import { makeStyles } from 'tss-react/mui';
 
-import { useAppStore, useAppDispatch, reset } from '../../../store';
+import { useAppStore, useAppDispatch, reset, useAppSelector } from '../../../store';
 import { SavedAppState } from '../../../types';
 import { Menu } from '../../../components';
 import { useUser } from '../../../auth-context';
+import { Project, useSaveProjectRequest } from '../../../api';
 import { SaveProjectDialog } from './save-project-dialog';
+import { useReadonlyContext } from '../readonly-context';
+import { useNavigate } from 'react-router';
+import { selectProjectId } from '../../../store/selectors/project-selector';
+import { omit } from 'lodash';
 
 const useStyles = makeStyles()(() => ({
   iconButton: {
@@ -16,10 +21,17 @@ const useStyles = makeStyles()(() => ({
   },
 }));
 
+enum SaveDialogState {
+  Save,
+  Clone,
+  Closed,
+}
+
 enum FileOption {
   Export,
   Load,
   Save,
+  Clone,
 }
 
 type FileOptionsProps = {
@@ -32,16 +44,21 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
   const reactFlowInstance = useReactFlow();
   const store = useAppStore();
 
+  const readonly = useReadonlyContext();
+
+  const projectId = useAppSelector(selectProjectId);
+
   const dispatch = useAppDispatch();
 
   const user = useUser();
 
-  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [saveDialogState, setSaveDialogState] = useState(SaveDialogState.Closed);
 
   const fileOptions = [
     { label: 'Экспортировать', value: FileOption.Export },
-    { label: 'Загрузить', value: FileOption.Load },
-    ...(user ? [{ label: 'Сохранить', value: FileOption.Save }] : []),
+    ...(!readonly ? [{ label: 'Загрузить', value: FileOption.Load }] : []),
+    ...(user && !readonly ? [{ label: 'Сохранить', value: FileOption.Save }] : []),
+    ...(user && readonly ? [{ label: 'Клонировать', value: FileOption.Clone }] : []),
   ];
 
   const getAppState = () => {
@@ -80,9 +97,7 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
     reactFlowInstance.setViewport(savedAppState.reactFlow.viewport);
   };
 
-  const handleOpenSaveDialog = () => setIsSaveDialogOpen(true);
-
-  const handleCloseSaveDialog = () => setIsSaveDialogOpen(false);
+  const handleCloseSaveDialog = () => setSaveDialogState(SaveDialogState.Closed);
 
   const handleOptionSelect = (option: FileOption) => {
     switch (option) {
@@ -93,12 +108,37 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
         handleLoad();
         break;
       case FileOption.Save:
-        handleOpenSaveDialog();
+        setSaveDialogState(SaveDialogState.Save);
+        break;
+      case FileOption.Clone:
+        setSaveDialogState(SaveDialogState.Clone);
         break;
       default:
         break;
     }
   };
+
+  const navigate = useNavigate();
+
+  const { saveProject, isLoading } = useSaveProjectRequest({
+    onSuccess: (project) => {
+      navigate(`/edit/${project.id}`);
+      handleCloseSaveDialog();
+    },
+  });
+
+  const handleSave = (formValues: Pick<Project, 'title' | 'description' | 'published'>) => {
+    let projectToSave: Project = { ...formValues, data: getAppState(), ...(projectId && { id: projectId }) };
+
+    if (saveDialogState === SaveDialogState.Clone) {
+      projectToSave = omit(projectToSave, 'id');
+    }
+
+    saveProject(projectToSave);
+    handleCloseSaveDialog();
+  };
+
+  console.log('ISOPEN', saveDialogState !== SaveDialogState.Closed);
 
   return (
     <>
@@ -114,7 +154,13 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
         )}
       />
 
-      <SaveProjectDialog isOpen={isSaveDialogOpen} onClose={handleCloseSaveDialog} getData={getAppState} />
+      <SaveProjectDialog
+        isLoading={isLoading}
+        title={saveDialogState === SaveDialogState.Save ? 'Сохранение' : 'Клонирование'}
+        isOpen={saveDialogState !== SaveDialogState.Closed}
+        onClose={handleCloseSaveDialog}
+        onSubmit={handleSave}
+      />
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { NodeProps } from 'reactflow';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData, NodeIOTableData } from '../../../types';
+import { NodeData, NodeIOObjectData, NodeIOTableData } from '../../../../types';
 import { FilterComponent } from './filter';
 
 type FilterProps = NodeProps<NodeData<NodeIOTableData, NodeIOObjectData>>;

@@ -6,6 +6,7 @@ import { makeStyles } from 'tss-react/mui';
 import { useAppDispatch, updateDependents, updateNodeById } from '../../../../store';
 import { BoardNode, NodeData, NodeIOObjectData } from '../../../../types';
 import { Select } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -39,6 +40,8 @@ type RenameColumnsComponentProps = {
 
 export const RenameColumnsComponent: React.FC<RenameColumnsComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -103,18 +106,32 @@ export const RenameColumnsComponent: React.FC<RenameColumnsComponentProps> = mem
             onChange={handleColumnSelect(index)}
             options={columnOptions}
             disabledOptions={pickedColumns}
+            disabled={readonly}
             fullWidth
           />
 
-          <TextField className="nodrag" value={newName} onChange={handleNewColumnNameChange(index)} size="small" fullWidth />
+          <TextField
+            className="nodrag"
+            value={newName}
+            onChange={handleNewColumnNameChange(index)}
+            size="small"
+            disabled={readonly}
+            fullWidth
+          />
         </div>
       ))}
 
-      <button className={classes.addColumnButton} onClick={handleAddColumn} disabled={renamedColumns.length === columns.length}>
+      <button
+        className={classes.addColumnButton}
+        onClick={handleAddColumn}
+        disabled={readonly || renamedColumns.length === columns.length}
+      >
         + add column
       </button>
 
-      <Button onClick={handleApply}>Apply</Button>
+      <Button onClick={handleApply} disabled={readonly}>
+        Apply
+      </Button>
     </div>
   );
 });

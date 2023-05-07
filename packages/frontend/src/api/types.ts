@@ -22,3 +22,12 @@ export type Project = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type ProjectListItem = {
+  id: string;
+  title: string;
+  description: string;
+  user: User;
+  created_at: string;
+  updated_at: string;
+};

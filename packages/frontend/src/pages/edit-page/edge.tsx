@@ -6,6 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { makeStyles } from 'tss-react/mui';
 import { useAppDispatch } from '../../store/hooks';
 import { removeEdge, updateDependents, resetNodeData } from '../../store/reducers/board';
+import { useReadonlyContext } from './readonly-context';
 
 const foreignObjectSize = 30;
 
@@ -38,6 +39,8 @@ export const NodeEdge: React.FC<EdgeProps> = ({
 }) => {
   const { classes } = useStyles();
 
+  const readonly = useReadonlyContext();
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -67,9 +70,11 @@ export const NodeEdge: React.FC<EdgeProps> = ({
         className="edgebutton-foreignobject"
         requiredExtensions="http://www.w3.org/1999/xhtml"
       >
-        <IconButton className={classes.button} onClick={handleRemoveEdge}>
-          <CloseIcon />
-        </IconButton>
+        {!readonly && (
+          <IconButton className={classes.button} onClick={handleRemoveEdge}>
+            <CloseIcon />
+          </IconButton>
+        )}
       </foreignObject>
     </>
   );

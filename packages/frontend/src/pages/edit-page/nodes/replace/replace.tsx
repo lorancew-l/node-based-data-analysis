@@ -6,6 +6,7 @@ import { useAppDispatch } from '../../../../store/hooks';
 import { updateDependents, updateNodeById } from '../../../../store/reducers/board';
 import { BoardNode, NodeData, NodeIOObjectData, NodeIOTableData, Filter, ReplaceCondition } from '../../../../types';
 import { Select } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -25,6 +26,8 @@ type ReplaceComponentProps = {
 
 export const ReplaceComponent: React.FC<ReplaceComponentProps> = memo(({ id, data }) => {
   const { cx, classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -62,15 +65,23 @@ export const ReplaceComponent: React.FC<ReplaceComponentProps> = memo(({ id, dat
 
   return (
     <div className={cx(classes.container, 'nodrag')}>
-      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} />
+      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Condition" value={replaceCondition} onChange={setReplaceCondition} options={replaceConditionOptions} />
+      <Select
+        label="Condition"
+        value={replaceCondition}
+        onChange={setReplaceCondition}
+        options={replaceConditionOptions}
+        disabled={readonly}
+      />
 
-      <TextField label="Pattern" value={pattern} onChange={handlePatternChange} />
+      <TextField label="Pattern" value={pattern} onChange={handlePatternChange} disabled={readonly} />
 
-      <TextField label="Value" value={newValue} onChange={handleNewValueChange} />
+      <TextField label="Value" value={newValue} onChange={handleNewValueChange} disabled={readonly} />
 
-      <Button onClick={handleApply}>Apply</Button>
+      <Button onClick={handleApply} disabled={readonly}>
+        Apply
+      </Button>
     </div>
   );
 });

@@ -7,6 +7,7 @@ import { makeStyles } from 'tss-react/mui';
 
 import { useAppDispatch, resetNodeData, updateDependents, updateNodeById } from '../../../../store';
 import { BoardNode, NodeData, NodeIOTableData } from '../../../../types';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   dropzoneContainer: {
@@ -38,6 +39,8 @@ type FileLoaderComponentProps = {
 
 export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const { params } = data ?? {};
 
@@ -80,7 +83,7 @@ export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ i
       {fileName ? (
         <div className={classes.fileName}>
           {fileName}
-          <IconButton className={classes.removeButton} onClick={handleRemoveFile}>
+          <IconButton className={classes.removeButton} onClick={handleRemoveFile} disabled={readonly}>
             <CloseIcon />
           </IconButton>
         </div>

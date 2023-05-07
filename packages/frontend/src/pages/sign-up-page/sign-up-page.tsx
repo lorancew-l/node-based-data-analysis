@@ -57,8 +57,6 @@ export const SignUpPage = () => {
 
   const { setTokens } = useAuthContext();
 
-  console.log(errors);
-
   const { signUpUser, isLoading } = useSignUpRequest({
     onSuccess: (tokens: TokenResponse) => {
       setTokens(tokens);

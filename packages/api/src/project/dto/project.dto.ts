@@ -1,5 +1,5 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
-
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 export class SaveProjectDto {
   @IsUUID()
   @IsOptional()
@@ -17,4 +17,25 @@ export class SaveProjectDto {
 
   @IsBoolean()
   published?: boolean;
+}
+
+export class SearchProjectsDto {
+  @IsInt()
+  @Type(() => Number)
+  @Min(1)
+  @IsNotEmpty()
+  page: number;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsNotEmpty()
+  offset: number;
+
+  @IsString()
+  @IsOptional()
+  user?: string;
+
+  @IsString()
+  @IsOptional()
+  search?: string;
 }

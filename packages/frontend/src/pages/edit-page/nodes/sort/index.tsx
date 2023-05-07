@@ -2,7 +2,7 @@ import { NodeProps } from 'reactflow';
 import { isEmpty } from 'lodash';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData } from '../../../types';
+import { NodeData, NodeIOObjectData } from '../../../../types';
 import { SortComponent } from './sort';
 
 type SortProps = NodeProps<NodeData<NodeIOObjectData, NodeIOObjectData>>;

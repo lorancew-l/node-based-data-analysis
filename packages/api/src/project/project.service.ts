@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { SaveProjectDto } from './dto';
+import { SaveProjectDto, SearchProjectsDto } from './dto';
 import { ProjectAccessDenied } from './exceptions';
 
 @Injectable()
@@ -34,5 +34,40 @@ export class ProjectService {
     }
 
     return project;
+  }
+
+  async searchProjects({ page, offset, user, search }: SearchProjectsDto) {
+    const where = {
+      published: true,
+    };
+
+    const [count, projects] = await this.databaseService.$transaction([
+      this.databaseService.project.count({ where }),
+      this.databaseService.project.findMany({
+        skip: offset * (page - 1),
+        take: offset,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          created_at: true,
+          updated_at: true,
+          user: {
+            select: {
+              email: true,
+              firstName: true,
+              id: true,
+              lastName: true,
+            },
+          },
+        },
+        where,
+        orderBy: {
+          updated_at: 'desc',
+        },
+      }),
+    ]);
+
+    return { count, page, offset, items: projects };
   }
 }

@@ -1,7 +1,7 @@
 import { NodeProps } from 'reactflow';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData, NodeIOTableData } from '../../../types';
+import { NodeData, NodeIOObjectData, NodeIOTableData } from '../../../../types';
 import { GroupByComponent } from './group-by';
 
 type GroupByProps = NodeProps<NodeData<NodeIOTableData, NodeIOObjectData>>;

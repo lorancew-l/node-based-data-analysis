@@ -1,5 +1,6 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { ReactFlowProvider } from 'reactflow';
+import { CircularProgress, Backdrop } from '@mui/material';
 import { useParams } from 'react-router';
 import { makeStyles } from 'tss-react/mui';
 
@@ -9,6 +10,7 @@ import { RendererContextProvider } from './renderer-context';
 import { TopBar } from './top-bar/top-bar';
 import { AddBlockButton } from './add-block-dialog/add-block-button';
 import { useLoadProject } from './use-load-project';
+import { ReadonlyContextProvider } from './readonly-context';
 
 const useStyles = makeStyles<{ topBarHeight: number }>()((theme, { topBarHeight }) => ({
   container: {
@@ -23,7 +25,24 @@ const useStyles = makeStyles<{ topBarHeight: number }>()((theme, { topBarHeight 
     top: `calc(${topBarHeight}px + ${theme.spacing(1.5)})`,
     zIndex: theme.zIndex.appBar,
   },
+  loader: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+  },
+  backdrop: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: theme.zIndex.modal,
+  },
 }));
+
+type EditPageProps = {
+  readonly: boolean;
+};
 
 const EditPageComponent = () => {
   const [outputHeight, setOutputHeight] = useState<number>(250);
@@ -44,6 +63,10 @@ const EditPageComponent = () => {
 
   return (
     <main className={classes.container}>
+      <Backdrop open={isLoading} className={classes.backdrop}>
+        <CircularProgress />
+      </Backdrop>
+
       <RendererContextProvider>
         <TopBar ref={headerRef} />
         <AddBlockButton className={classes.addBlockButton} />
@@ -54,10 +77,12 @@ const EditPageComponent = () => {
   );
 };
 
-export const EditPage = () => {
+export const EditPage: React.FC<EditPageProps> = ({ readonly }) => {
   return (
-    <ReactFlowProvider>
-      <EditPageComponent />
-    </ReactFlowProvider>
+    <ReadonlyContextProvider readonly={readonly}>
+      <ReactFlowProvider>
+        <EditPageComponent />
+      </ReactFlowProvider>
+    </ReadonlyContextProvider>
   );
 };

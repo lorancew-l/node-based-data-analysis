@@ -2,7 +2,7 @@ import { NodeProps } from 'reactflow';
 import { isEmpty } from 'lodash';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData } from '../../../types';
+import { NodeData, NodeIOObjectData } from '../../../../types';
 import { AggregateComponent } from './aggregate';
 
 type AggregateProps = NodeProps<NodeData<NodeIOObjectData, NodeIOObjectData>>;

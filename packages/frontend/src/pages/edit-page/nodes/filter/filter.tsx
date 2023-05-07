@@ -7,6 +7,7 @@ import { BoardNode, NodeData, NodeIOObjectData, NodeIOTableData, Filter } from '
 import { Select } from '../../../../components';
 import { getColumnDataType } from '../../../../utils/common';
 import { dataTypeToOptions } from './data-type-to-options';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -24,6 +25,8 @@ type FilterComponentProps = {
 
 export const FilterComponent: React.FC<FilterComponentProps> = memo(({ id, data }) => {
   const { cx, classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -59,13 +62,15 @@ export const FilterComponent: React.FC<FilterComponentProps> = memo(({ id, data 
 
   return (
     <div className={cx(classes.container, 'nodrag')}>
-      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} />
+      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Condition" value={selectedFilter} onChange={setSelectedFilter} options={filterOptions} />
+      <Select label="Condition" value={selectedFilter} onChange={setSelectedFilter} options={filterOptions} disabled={readonly} />
 
-      {selectedFilter !== Filter.NotEmpty && <TextField value={pattern} onChange={handlePatternChange} />}
+      {selectedFilter !== Filter.NotEmpty && <TextField value={pattern} onChange={handlePatternChange} disabled={readonly} />}
 
-      <Button onClick={handleApply}>Apply</Button>
+      <Button onClick={handleApply} disabled={readonly}>
+        Apply
+      </Button>
     </div>
   );
 });

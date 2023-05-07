@@ -9,6 +9,7 @@ import { connectNodes, updateDependents, updateEdges, updateNodes } from '../../
 import { selectEdges, selectNodes } from '../../../store/selectors/node-selectors';
 import { nodeTypes, edgeTypes } from '../node-config';
 import { useRendererContext } from '../renderer-context';
+import { useReadonlyContext } from '../readonly-context';
 
 const useStyles = makeStyles<{ height: string | number }>()((theme, { height }) => ({
   container: {
@@ -34,6 +35,11 @@ const useStyles = makeStyles<{ height: string | number }>()((theme, { height }) 
 
 const proOptions = { hideAttribution: true };
 
+const readonlyProps = {
+  nodesDraggable: false,
+  nodesConnectable: false,
+};
+
 type BoardProps = {
   height: string | number;
 };
@@ -41,6 +47,8 @@ type BoardProps = {
 export const Board: React.FC<BoardProps> = ({ height }) => {
   const { classes } = useStyles({ height });
   const theme = useTheme();
+
+  const readonly = useReadonlyContext();
 
   const rendererRef = useRendererContext();
 
@@ -70,6 +78,7 @@ export const Board: React.FC<BoardProps> = ({ height }) => {
         onConnect={handleConnect}
         proOptions={proOptions}
         ref={rendererRef}
+        {...(readonly && readonlyProps)}
       >
         <Background size={2} color={theme.palette.background.paper} className={classes.background} />
         <Controls className={classes.controls} />

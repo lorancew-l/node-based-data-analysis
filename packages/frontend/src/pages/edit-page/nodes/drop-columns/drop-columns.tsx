@@ -4,6 +4,7 @@ import { makeStyles } from 'tss-react/mui';
 import { useAppDispatch, updateDependents, updateNodeById } from '../../../../store';
 import { BoardNode, NodeData, NodeIOObjectData } from '../../../../types';
 import { Select } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -24,6 +25,8 @@ export const DropColumnsComponent: React.FC<DropColumnsComponentProps> = memo(({
 
   const dispatch = useAppDispatch();
 
+  const readonly = useReadonlyContext();
+
   const { columns } = data.input;
   const droppedColumns = data.params.droppedColumns ?? [];
   const columnsOptions = columns.map((column, index) => ({ value: index, label: column }));
@@ -42,7 +45,14 @@ export const DropColumnsComponent: React.FC<DropColumnsComponentProps> = memo(({
 
   return (
     <div className={classes.container}>
-      <Select label="Columns" value={droppedColumns} onChange={handleColumnsChange as any} options={columnsOptions} multiple />
+      <Select
+        label="Columns"
+        value={droppedColumns}
+        onChange={handleColumnsChange as any}
+        options={columnsOptions}
+        disabled={readonly}
+        multiple
+      />
     </div>
   );
 });

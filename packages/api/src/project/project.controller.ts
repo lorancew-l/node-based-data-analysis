@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Query, UseGuards, ForbiddenException } from '@nestjs/common';
-import { SaveProjectDto } from './dto';
+import { SaveProjectDto, SearchProjectsDto } from './dto';
 import { GetUserId } from 'src/auth/decorators';
 import { AccessGuard } from 'src/auth/guards';
 import { ProjectService } from './project.service';
@@ -25,5 +25,11 @@ export class ProjectController {
         return new ForbiddenException();
       }
     }
+  }
+
+  @UseGuards(AccessGuard)
+  @Get('search')
+  async searchProjects(@Query() query: SearchProjectsDto) {
+    return await this.projectService.searchProjects(query);
   }
 }

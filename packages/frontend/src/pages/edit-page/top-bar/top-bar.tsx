@@ -4,6 +4,8 @@ import { Typography } from '@mui/material';
 
 import { Account } from './account';
 import { FileOptions } from './file-options';
+import { useAppSelector } from '../../../store';
+import { selectProjectTitle } from '../../../store/selectors/project-selector';
 
 const useStyles = makeStyles()((theme) => ({
   logo: {
@@ -38,12 +40,14 @@ type TopBarProps = {};
 export const TopBar = forwardRef<HTMLElement, TopBarProps>(({}, ref) => {
   const { classes } = useStyles();
 
+  const title = useAppSelector(selectProjectTitle);
+
   return (
     <header ref={ref} className={classes.header}>
       <FileOptions className={classes.logo} />
 
       <Typography variant="body1" className={classes.projectTitle} color="primary">
-        Без названия
+        {title ?? 'Без названия'}
       </Typography>
 
       <Account />

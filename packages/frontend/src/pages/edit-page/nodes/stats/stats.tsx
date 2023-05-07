@@ -8,6 +8,7 @@ import { median } from '../../../../utils/common';
 import { arrayToNumber } from '../../../../utils/node';
 import { useAppDispatch, updateNodeById } from '../../../../store';
 import { Stat } from './stat';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -25,6 +26,8 @@ type StatsComponentProps = {
 
 export const StatsComponent: React.FC<StatsComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -58,7 +61,7 @@ export const StatsComponent: React.FC<StatsComponentProps> = memo(({ id, data })
 
   return (
     <div className={classes.container}>
-      <Select label="Columns" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} />
+      <Select label="Columns" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
       <Stat label="Min" value={stats.min} />
 

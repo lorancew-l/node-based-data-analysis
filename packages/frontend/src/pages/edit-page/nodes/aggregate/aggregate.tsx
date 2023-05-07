@@ -4,6 +4,7 @@ import { makeStyles } from 'tss-react/mui';
 import { useAppDispatch, updateDependents, updateNodeById } from '../../../../store';
 import { BoardNode, NodeData, NodeIOObjectData, AggregateFunctionName } from '../../../../types';
 import { Select, Option } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -28,6 +29,8 @@ type AggregateComponentProps = {
 
 export const AggregateComponent: React.FC<AggregateComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -63,9 +66,15 @@ export const AggregateComponent: React.FC<AggregateComponentProps> = memo(({ id,
 
   return (
     <div className={classes.container}>
-      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} />
+      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Function" value={selectedFunction} onChange={handleFunctionChange} options={aggregateFunctionOptions} />
+      <Select
+        label="Function"
+        value={selectedFunction}
+        onChange={handleFunctionChange}
+        options={aggregateFunctionOptions}
+        disabled={readonly}
+      />
     </div>
   );
 });

@@ -8,6 +8,8 @@ import { useAppDispatch, useAppStore, removeNode } from '../../../store';
 import Typography from '@mui/material/Typography';
 import { NodeData } from '../../../types';
 import { getNodeAllDependencies } from '../../../utils/common';
+import { useReadonlyContext } from '../readonly-context';
+import { isEmpty } from 'lodash';
 
 const useStyles = makeStyles<{ selected: boolean }>()((theme, { selected }) => ({
   container: {
@@ -72,6 +74,8 @@ export const BaseNode: React.FC<BaseNodeProps> = ({ id, title, children, selecte
   const dispatch = useAppDispatch();
   const { getNodes } = useReactFlow<NodeData>();
 
+  const readonly = useReadonlyContext();
+
   const { getState } = useAppStore();
 
   const handleRemove = () => {
@@ -88,11 +92,12 @@ export const BaseNode: React.FC<BaseNodeProps> = ({ id, title, children, selecte
 
     const targetDependencies = getNodeAllDependencies(target.id, board.dependencies);
 
+    const isAlreadyConnected = Object.values(board.dependencies).some((deps) => deps.includes(target.id));
     const isDifferentNodes = source !== target;
     const isCycleDependency = targetDependencies.includes(source.id);
     const isTypeMatches = source.data.outputType.some((nodeType) => target.data.inputType.includes(nodeType));
 
-    return isDifferentNodes && !isCycleDependency && isTypeMatches;
+    return !isAlreadyConnected && isDifferentNodes && !isCycleDependency && isTypeMatches;
   };
 
   return (
@@ -105,7 +110,7 @@ export const BaseNode: React.FC<BaseNodeProps> = ({ id, title, children, selecte
             <Typography variant="body1">{title}</Typography>
           </div>
 
-          <IconButton className={classes.icon} onClick={handleRemove}>
+          <IconButton className={classes.icon} onClick={handleRemove} disabled={readonly}>
             <CloseIcon />
           </IconButton>
         </div>

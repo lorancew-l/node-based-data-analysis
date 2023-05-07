@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 import { makeStyles } from 'tss-react/mui';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOTableData } from '../../../types';
+import { NodeData, NodeIOTableData } from '../../../../types';
 import { RenameColumnsComponent } from './rename-columns';
 
 const useStyles = makeStyles()(() => ({

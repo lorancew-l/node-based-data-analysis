@@ -4,6 +4,7 @@ import { makeStyles } from 'tss-react/mui';
 import { useAppDispatch, updateDependents, updateNodeById } from '../../../../store';
 import { BoardNode, NodeData, NodeIOObjectData, SortOrder } from '../../../../types';
 import { Select } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -26,6 +27,8 @@ type SortComponentProps = {
 
 export const SortComponent: React.FC<SortComponentProps> = memo(({ id, data }) => {
   const { classes } = useStyles();
+
+  const readonly = useReadonlyContext();
 
   const dispatch = useAppDispatch();
 
@@ -61,9 +64,9 @@ export const SortComponent: React.FC<SortComponentProps> = memo(({ id, data }) =
 
   return (
     <div className={classes.container}>
-      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} />
+      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Order" value={selectedOrder} onChange={handleOrderChange} options={sortOrderOptions} />
+      <Select label="Order" value={selectedOrder} onChange={handleOrderChange} options={sortOrderOptions} disabled={readonly} />
     </div>
   );
 });

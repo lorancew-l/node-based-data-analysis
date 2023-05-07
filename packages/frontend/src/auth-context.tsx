@@ -21,13 +21,41 @@ type AuthContextReturn = {
 
 const authContext = createContext({} as AuthContextReturn);
 
+const storageTokensKey = '@nbda/tokens';
+
+const getTokensFormStorage = (): TokenResponse | null => {
+  try {
+    return JSON.parse(localStorage.getItem(storageTokensKey));
+  } catch {
+    return null;
+  }
+};
+
+const setTokensToStorage = (tokens: TokenResponse) => {
+  localStorage.setItem(storageTokensKey, JSON.stringify(tokens));
+};
+
+const removeTokensFromStorage = () => {
+  localStorage.removeItem(storageTokensKey);
+};
+
 export const useAuthContext = () => useContext(authContext);
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children, onRefreshFail }) => {
-  const user = useRef<User>(null);
   const subscribers = useRef<UserUpdateSubscriberCb[]>([]);
 
-  const tokens = useRef<TokenResponse>(null);
+  const tokens = useRef<TokenResponse>(getTokensFormStorage());
+
+  const getUserFromToken = (token: TokenResponse['access_token']): User => {
+    try {
+      return jwtDecode(token);
+    } catch {
+      return null;
+    }
+  };
+
+  const user = useRef<User>(getUserFromToken(tokens?.current?.access_token));
+
   const pendingTokens = useRef<Promise<TokenResponse>>(null);
 
   const { refresh } = useRefreshTokens({ onError: onRefreshFail });
@@ -46,11 +74,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
   };
 
   const setTokens = (newTokens: TokenResponse) => {
-    const newUser: User = jwtDecode(newTokens.access_token);
-
-    user.current = newUser;
+    user.current = getUserFromToken(newTokens.access_token);
     tokens.current = newTokens;
 
+    setTokensToStorage(newTokens);
     notifySubscribers();
   };
 
@@ -60,7 +87,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
       return access_token;
     }
 
-    return tokens.current.access_token;
+    return tokens.current?.access_token;
   };
 
   const refreshTokens = async () => {
@@ -68,7 +95,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
       return getToken();
     }
 
-    const { refresh_token } = tokens.current;
+    const { refresh_token } = tokens.current ?? {};
 
     tokens.current = null;
     pendingTokens.current = refresh(refresh_token);
@@ -83,6 +110,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     user.current = null;
     tokens.current = null;
     pendingTokens.current = null;
+    removeTokensFromStorage();
     notifySubscribers();
   };
 

@@ -1,8 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { boardReducer } from './reducers';
+import { projectReducer } from './reducers/project';
 
 export const rootReducer = combineReducers({
   board: boardReducer,
+  project: projectReducer,
 });
 
 export const store = configureStore({

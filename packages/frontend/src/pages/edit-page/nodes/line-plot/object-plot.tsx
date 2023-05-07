@@ -1,6 +1,6 @@
 import { useMemo, memo } from 'react';
 
-import { NodeIOObjectData } from '../../../types';
+import { NodeIOObjectData } from '../../../../types';
 import { Plot } from './plot';
 
 type ObjectPlotProps = {

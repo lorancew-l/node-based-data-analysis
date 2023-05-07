@@ -4,6 +4,7 @@ import { ScatterChart, CartesianGrid, Scatter, XAxis, YAxis } from 'recharts';
 
 import { NodeData, NodeIOTableData } from '../../../../types';
 import { Select } from '../../../../components';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -21,6 +22,8 @@ type PlotProps = {
 export const Plot: React.FC<PlotProps> = memo(({ data }) => {
   const { classes } = useStyles();
 
+  const readonly = useReadonlyContext();
+
   const { input } = data;
 
   const { columns, data: rows } = input;
@@ -36,9 +39,9 @@ export const Plot: React.FC<PlotProps> = memo(({ data }) => {
 
   return (
     <div className={classes.container}>
-      <Select label="x-axis" value={xAxis} onChange={setXAxis} options={options} fullWidth />
+      <Select label="x-axis" value={xAxis} onChange={setXAxis} options={options} disabled={readonly} fullWidth />
 
-      <Select label="y-axis" value={yAxis} onChange={setYAxis} options={options} fullWidth />
+      <Select label="y-axis" value={yAxis} onChange={setYAxis} options={options} disabled={readonly} fullWidth />
 
       <ScatterChart
         width={300}

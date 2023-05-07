@@ -2,7 +2,7 @@ import { Avatar, Paper, Grid, TextField, Button, Typography } from '@mui/materia
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { makeStyles } from 'tss-react/mui';
 import { useSignInRequest, TokenResponse, SignInUser } from '../../api';
 import { useAuthContext } from '../../auth-context';
@@ -53,12 +53,14 @@ export const SignInPage = () => {
 
   const navigate = useNavigate();
 
+  const location = useLocation();
+
   const { setTokens } = useAuthContext();
 
   const { signInUser, isLoading } = useSignInRequest({
     onSuccess: (tokens: TokenResponse) => {
       setTokens(tokens);
-      navigate('/edit/d381072e-246b-4e14-932f-834e9819f52c');
+      navigate(location?.state?.redirectTo ?? '/edit');
     },
     onError: (status) => {
       if (status === 401) {

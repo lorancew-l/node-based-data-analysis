@@ -1,7 +1,7 @@
 import { NodeProps } from 'reactflow';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData } from '../../../types';
+import { NodeData, NodeIOObjectData } from '../../../../types';
 import { Plot } from './plot';
 import { isEmpty } from 'lodash';
 

@@ -1,7 +1,7 @@
 import { NodeProps } from 'reactflow';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOTableData } from '../../../types';
+import { NodeData, NodeIOTableData } from '../../../../types';
 import { Plot } from './plot';
 
 type ScatterPlotProps = NodeProps<NodeData<NodeIOTableData, NodeIOTableData>>;

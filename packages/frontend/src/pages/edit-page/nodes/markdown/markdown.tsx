@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 
 import { BoardNode, NodeData, NodeIOObjectData, NodeIOTableData } from '../../../../types';
 import { useAppDispatch, removeNode, updateNodeById } from '../../../../store';
+import { useReadonlyContext } from '../../readonly-context';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -49,6 +50,8 @@ type MarkdownComponentProps = {
 export const MarkdownComponent: React.FC<MarkdownComponentProps> = memo(({ id, data }) => {
   const { cx, classes } = useStyles();
 
+  const readonly = useReadonlyContext();
+
   const { params } = data;
   const { markdown } = params;
 
@@ -86,11 +89,11 @@ export const MarkdownComponent: React.FC<MarkdownComponentProps> = memo(({ id, d
     <div className={classes.container} onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
       {isHovered && !isEditModeOn && (
         <span className={classes.toolbar}>
-          <IconButton className={classes.button} onClick={handleRemove}>
+          <IconButton className={classes.button} onClick={handleRemove} disabled={readonly}>
             <CloseIcon />
           </IconButton>
 
-          <IconButton className={classes.button} onClick={handleEditOn}>
+          <IconButton className={classes.button} onClick={handleEditOn} disabled={readonly}>
             <EditIcon />
           </IconButton>
         </span>
@@ -104,6 +107,7 @@ export const MarkdownComponent: React.FC<MarkdownComponentProps> = memo(({ id, d
           value={markdown}
           onChange={handleTextChange}
           onBlur={handleBlur}
+          disabled={readonly}
         />
       ) : (
         <ReactMarkdown className={classes.markdownRenderer}>{markdown || placeholder}</ReactMarkdown>

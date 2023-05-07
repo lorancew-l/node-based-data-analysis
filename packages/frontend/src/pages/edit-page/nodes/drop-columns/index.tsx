@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 import { makeStyles } from 'tss-react/mui';
 
 import { BaseNode } from '../base-node';
-import { NodeData, NodeIOObjectData } from '../../../types';
+import { NodeData, NodeIOObjectData } from '../../../../types';
 import { DropColumnsComponent } from './drop-columns';
 
 const useStyles = makeStyles()(() => ({
