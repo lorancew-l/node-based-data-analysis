@@ -55,7 +55,6 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
         onSuccess?.(data);
         setData(data);
       } catch (error) {
-        console.log('error', error);
         onError?.(error);
         setError(error);
       } finally {

@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { useGetProjectRequest } from '../../api';
 import { reset, useAppDispatch } from '../../store';
 import { useReactFlow } from 'reactflow';
-import { useLocation, useNavigate } from 'react-router';
-import { useUser } from '../../auth-context';
 import { setProject } from '../../store/reducers/project';
 
 export const useLoadProject = (projectId: string) => {
@@ -11,20 +9,10 @@ export const useLoadProject = (projectId: string) => {
 
   const dispatch = useAppDispatch();
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const user = useUser();
-
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
     if (!projectId) {
-      return;
-    }
-
-    if (projectId && !user) {
-      navigate('/signin', { state: { redirectTo: location.pathname } });
       return;
     }
 

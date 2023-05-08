@@ -138,8 +138,6 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
     handleCloseSaveDialog();
   };
 
-  console.log('ISOPEN', saveDialogState !== SaveDialogState.Closed);
-
   return (
     <>
       <Menu

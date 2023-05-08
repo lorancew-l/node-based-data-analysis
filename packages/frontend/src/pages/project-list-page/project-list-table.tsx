@@ -16,12 +16,39 @@ import {
   IconButton,
   Tooltip,
   Link,
+  CircularProgress,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { makeStyles } from 'tss-react/mui';
 import { visuallyHidden } from '@mui/utils';
 import { useSearchProjectsRequest } from '../../api/use-search-projects-request';
 import { ProjectListItem } from '../../api';
 import { Pagination } from './pagination';
+
+const useStyles = makeStyles()((theme) => ({
+  tableContainer: {
+    position: 'relative',
+  },
+  loader: {
+    position: 'absolute',
+    left: '50%',
+    top: '40%',
+    transform: 'translate(-50%,-50%)',
+  },
+  row: {
+    position: 'relative',
+  },
+  moreIcon: {
+    width: 24,
+    height: 24,
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    cursor: 'pointer',
+  },
+}));
 
 type LimitedTextProps = {
   text: string;
@@ -151,6 +178,8 @@ const EnhancedTableToolbar: React.FC<EnhancedTableToolbarProps> = ({}) => {
 };
 
 export const ProjectListTable: React.FC = () => {
+  const { classes } = useStyles();
+
   const [rows, setRows] = useState<ProjectListItem[]>([]);
 
   const [count, setCount] = useState<number>(0);
@@ -162,7 +191,7 @@ export const ProjectListTable: React.FC = () => {
   const page = Number(searchParams.get('page')) || 1;
   const offset = Number(searchParams.get('offset')) || 20;
 
-  const { searchProjects } = useSearchProjectsRequest({
+  const { searchProjects, isLoading } = useSearchProjectsRequest({
     onSuccess: ({ count, items }) => {
       setRows(items);
       setCount(count);
@@ -192,18 +221,20 @@ export const ProjectListTable: React.FC = () => {
   const sortedRows = useMemo(() => rows.slice().sort(getComparator(order, orderBy)), [order, orderBy, rows]);
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%' }} className={classes.tableContainer}>
       <Paper sx={{ width: '100%' }}>
         <EnhancedTableToolbar />
 
+        {isLoading && <CircularProgress className={classes.loader} />}
+
         <TableContainer style={{ maxHeight: 'calc(100vh - 116px)' }}>
-          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium" stickyHeader>
+          <Table size="medium" stickyHeader>
             <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={sortedRows.length} />
 
             <TableBody>
               {sortedRows.map((row) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id} sx={{ cursor: 'pointer' }}>
+                  <TableRow className={classes.row} role="checkbox" tabIndex={-1} key={row.id} sx={{ cursor: 'pointer' }} hover>
                     <TableCell padding="checkbox">
                       <Checkbox color="primary" />
                     </TableCell>
@@ -229,6 +260,10 @@ export const ProjectListTable: React.FC = () => {
                     <TableCell component="th" scope="row" padding="none">
                       {new Date(row.updated_at).toLocaleDateString()}
                     </TableCell>
+
+                    <span className={classes.moreIcon}>
+                      <MoreHorizIcon />
+                    </span>
                   </TableRow>
                 );
               })}

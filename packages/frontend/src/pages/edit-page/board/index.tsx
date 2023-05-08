@@ -81,7 +81,9 @@ export const Board: React.FC<BoardProps> = ({ height }) => {
         {...(readonly && readonlyProps)}
       >
         <Background size={2} color={theme.palette.background.paper} className={classes.background} />
-        <Controls className={classes.controls} />
+
+        <Controls className={classes.controls} showInteractive={!readonly} />
+
         <MiniMap
           className={classes.background}
           nodeColor={theme.palette.background.paper}

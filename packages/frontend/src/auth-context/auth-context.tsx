@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useRef, useState, useEffect } from 'react';
-import { TokenResponse, User, useRefreshTokens } from './api';
+import { TokenPayload, TokenResponse, User, useRefreshTokens } from '../api';
 import jwtDecode from 'jwt-decode';
+import { useStorageAuth } from './use-storage-auth';
 
 type AuthContextProviderProps = {
   children: React.ReactNode;
@@ -23,62 +24,54 @@ const authContext = createContext({} as AuthContextReturn);
 
 const storageTokensKey = '@nbda/tokens';
 
-const getTokensFormStorage = (): TokenResponse | null => {
-  try {
-    return JSON.parse(localStorage.getItem(storageTokensKey));
-  } catch {
-    return null;
-  }
-};
-
-const setTokensToStorage = (tokens: TokenResponse) => {
-  localStorage.setItem(storageTokensKey, JSON.stringify(tokens));
-};
-
-const removeTokensFromStorage = () => {
-  localStorage.removeItem(storageTokensKey);
-};
-
 export const useAuthContext = () => useContext(authContext);
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children, onRefreshFail }) => {
+  const { getTokenFromStorage, setTokenToStorage, removeTokenFromStorage } = useStorageAuth(storageTokensKey);
+
   const subscribers = useRef<UserUpdateSubscriberCb[]>([]);
 
-  const tokens = useRef<TokenResponse>(getTokensFormStorage());
+  const tokens = useRef<TokenResponse>(getTokenFromStorage());
+  const pendingTokens = useRef<Promise<TokenResponse>>(null);
 
-  const getUserFromToken = (token: TokenResponse['access_token']): User => {
+  const getUserFromToken = ({ refresh_token }: TokenResponse): User => {
     try {
-      return jwtDecode(token);
+      const { exp, email, firstName, lastName, id }: TokenPayload = jwtDecode(refresh_token);
+      const expDate = new Date(exp * 1000);
+
+      const isExpired = new Date() > expDate;
+
+      if (isExpired) {
+        return null;
+      }
+
+      return { id, email, firstName, lastName };
     } catch {
       return null;
     }
   };
 
-  const user = useRef<User>(getUserFromToken(tokens?.current?.access_token));
-
-  const pendingTokens = useRef<Promise<TokenResponse>>(null);
-
-  const { refresh } = useRefreshTokens({ onError: onRefreshFail });
+  const user = useRef<User>(getUserFromToken(tokens.current));
 
   const getUser = () => user.current;
+
+  const setTokens = (newTokens: TokenResponse) => {
+    user.current = getUserFromToken(newTokens);
+    tokens.current = newTokens;
+    pendingTokens.current = null;
+
+    setTokenToStorage(newTokens);
+    notifySubscribers();
+  };
+
+  const { refresh } = useRefreshTokens({
+    onSuccess: setTokens,
+    onError: onRefreshFail,
+  });
 
   const notifySubscribers = () => {
     const currentUser = getUser();
     subscribers.current.forEach((subscriberCb) => subscriberCb(currentUser));
-  };
-
-  const subscribeUserUpdate = (cb: UserUpdateSubscriberCb) => subscribers.current.push(cb);
-
-  const unsubscribeUserUpdate = (cb: UserUpdateSubscriberCb) => {
-    subscribers.current = subscribers.current.filter((subscriberCb) => subscriberCb !== cb);
-  };
-
-  const setTokens = (newTokens: TokenResponse) => {
-    user.current = getUserFromToken(newTokens.access_token);
-    tokens.current = newTokens;
-
-    setTokensToStorage(newTokens);
-    notifySubscribers();
   };
 
   const getToken = async () => {
@@ -96,12 +89,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     }
 
     const { refresh_token } = tokens.current ?? {};
-
-    tokens.current = null;
     pendingTokens.current = refresh(refresh_token);
-
-    await pendingTokens.current;
-    pendingTokens.current = null;
 
     return getToken();
   };
@@ -110,8 +98,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     user.current = null;
     tokens.current = null;
     pendingTokens.current = null;
-    removeTokensFromStorage();
+    removeTokenFromStorage();
     notifySubscribers();
+  };
+
+  const subscribeUserUpdate = (cb: UserUpdateSubscriberCb) => subscribers.current.push(cb);
+
+  const unsubscribeUserUpdate = (cb: UserUpdateSubscriberCb) => {
+    subscribers.current = subscribers.current.filter((subscriberCb) => subscriberCb !== cb);
   };
 
   const value = useMemo(

@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { makeStyles } from 'tss-react/mui';
-import { Typography } from '@mui/material';
-
+import { Typography, Link } from '@mui/material';
+import { Link as RRLink } from 'react-router-dom';
 import { Account } from './account';
 import { FileOptions } from './file-options';
 import { useAppSelector } from '../../../store';
@@ -45,6 +45,10 @@ export const TopBar = forwardRef<HTMLElement, TopBarProps>(({}, ref) => {
   return (
     <header ref={ref} className={classes.header}>
       <FileOptions className={classes.logo} />
+
+      <Link component={RRLink} to={`/projects`} variant="body2">
+        Проекты
+      </Link>
 
       <Typography variant="body1" className={classes.projectTitle} color="primary">
         {title ?? 'Без названия'}

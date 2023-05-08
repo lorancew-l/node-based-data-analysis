@@ -1,9 +1,19 @@
 import { SavedAppState } from '../types';
 
 export type User = {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
+};
+
+export type TokenPayload = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  exp: number;
+  iat: number;
 };
 
 export type SignUpUser = User & { password: string };

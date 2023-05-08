@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
-import { omit } from 'lodash';
+import { pick } from 'lodash';
 import * as bcrypt from 'bcrypt';
 import { DatabaseService } from 'src/database/database.service';
 import { SignInUserDto, SignUpUserDto } from './dto';
@@ -87,7 +87,7 @@ export class AuthService {
   }
 
   private async getTokens(user: User) {
-    const payload = omit(user, 'password');
+    const payload = pick(user, ['id', 'email', 'firstName', 'lastName']);
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {

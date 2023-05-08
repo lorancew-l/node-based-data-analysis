@@ -54,6 +54,8 @@ export class AuthController {
       if (error instanceof InvalidToken) {
         throw new UnauthorizedException(error.message);
       }
+
+      throw error;
     }
   }
 }

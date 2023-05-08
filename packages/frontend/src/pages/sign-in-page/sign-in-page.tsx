@@ -60,7 +60,7 @@ export const SignInPage = () => {
   const { signInUser, isLoading } = useSignInRequest({
     onSuccess: (tokens: TokenResponse) => {
       setTokens(tokens);
-      navigate(location?.state?.redirectTo ?? '/edit');
+      navigate(location?.state?.from ?? '/edit');
     },
     onError: (status) => {
       if (status === 401) {
