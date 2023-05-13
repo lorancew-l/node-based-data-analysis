@@ -2,9 +2,9 @@ import { makeStyles } from 'tss-react/mui';
 import { useNavigate } from 'react-router';
 import { IconButton, Avatar, Tooltip } from '@mui/material';
 
-import { Menu } from '../../../components';
-import { useAuthContext, useUser } from '../../../auth-context';
-import { useLogoutRequest } from '../../../api';
+import { Menu } from '.';
+import { useAuthContext, useUser } from '../auth-context';
+import { useLogoutRequest } from '../api';
 
 const useStyles = makeStyles()((theme) => ({
   avatar: {

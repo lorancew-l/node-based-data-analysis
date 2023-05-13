@@ -2,20 +2,20 @@ import { forwardRef } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { Typography, Link } from '@mui/material';
 import { Link as RRLink } from 'react-router-dom';
-import { Account } from './account';
 import { FileOptions } from './file-options';
 import { useAppSelector } from '../../../store';
 import { selectProjectTitle } from '../../../store/selectors/project-selector';
+import { TopBar, Account } from '../../../components';
 
 const useStyles = makeStyles()((theme) => ({
   logo: {
-    marginRight: theme.spacing(1.5),
+    marginRight: theme.spacing(2),
   },
   header: {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(1.5),
+    padding: theme.spacing(1.5, 2),
     backgroundColor: theme.palette.background.default,
     borderBottom: `1px solid ${theme.palette.primary.main}`,
   },
@@ -33,28 +33,39 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: 'center',
     gap: theme.spacing(1),
   },
+  nav: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+  },
 }));
 
-type TopBarProps = {};
+type EditPageTopBarProps = {};
 
-export const TopBar = forwardRef<HTMLElement, TopBarProps>(({}, ref) => {
+export const EditPageTopBar = forwardRef<HTMLElement, EditPageTopBarProps>(({}, ref) => {
   const { classes } = useStyles();
 
   const title = useAppSelector(selectProjectTitle);
 
   return (
-    <header ref={ref} className={classes.header}>
+    <TopBar ref={ref}>
       <FileOptions className={classes.logo} />
 
-      <Link component={RRLink} to={`/projects`} variant="body2">
-        Проекты
-      </Link>
+      <nav className={classes.nav}>
+        <Link component={RRLink} to={'/my-projects'} variant="body2">
+          Мои проекты
+        </Link>
 
-      <Typography variant="body1" className={classes.projectTitle} color="primary">
+        <Link component={RRLink} to={'/projects'} variant="body2">
+          Проекты
+        </Link>
+      </nav>
+
+      <Typography variant="body2" className={classes.projectTitle} color="primary">
         {title ?? 'Без названия'}
       </Typography>
 
       <Account />
-    </header>
+    </TopBar>
   );
 });

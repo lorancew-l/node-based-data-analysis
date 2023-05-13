@@ -19,7 +19,7 @@ export class SaveProjectDto {
   published?: boolean;
 }
 
-export class SearchProjectsDto {
+export class SearchPublicProjectsDto {
   @IsInt()
   @Type(() => Number)
   @Min(1)
@@ -34,6 +34,23 @@ export class SearchProjectsDto {
   @IsString()
   @IsOptional()
   user?: string;
+
+  @IsString()
+  @IsOptional()
+  search?: string;
+}
+
+export class SearchUserProjectsDto {
+  @IsInt()
+  @Type(() => Number)
+  @Min(1)
+  @IsNotEmpty()
+  page: number;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsNotEmpty()
+  offset: number;
 
   @IsString()
   @IsOptional()

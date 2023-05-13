@@ -107,7 +107,7 @@ const SaveProjectDialogContent: React.FC<SaveProjectDialogContentProps> = ({ tit
 
           <TextField key="test" {...descriptionField} label="Описание" fullWidth multiline />
 
-          <FormControlLabel control={<Checkbox defaultChecked {...publishedField} />} label="Публичный доступ" />
+          <FormControlLabel control={<Checkbox {...publishedField} />} label="Публичный доступ" />
         </div>
 
         <Button

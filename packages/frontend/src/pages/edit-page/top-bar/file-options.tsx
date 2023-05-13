@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Tooltip, IconButton } from '@mui/material';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import { useReactFlow } from 'reactflow';
+import { omit } from 'lodash';
 import { makeStyles } from 'tss-react/mui';
 
 import { useAppStore, useAppDispatch, reset, useAppSelector } from '../../../store';
@@ -11,9 +13,8 @@ import { useUser } from '../../../auth-context';
 import { Project, useSaveProjectRequest } from '../../../api';
 import { SaveProjectDialog } from './save-project-dialog';
 import { useReadonlyContext } from '../readonly-context';
-import { useNavigate } from 'react-router';
 import { selectProjectId } from '../../../store/selectors/project-selector';
-import { omit } from 'lodash';
+import { exportToJson, loadJson } from '../utils';
 
 const useStyles = makeStyles()(() => ({
   iconButton: {
@@ -72,26 +73,11 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
   };
 
   const handleExport = async () => {
-    const dataToSave = JSON.stringify(getAppState());
-    const fileToSave = new Blob([dataToSave], { type: 'application/json' });
-
-    // @ts-ignore
-    const fileHandle: FileSystemFileHandle = await window.showSaveFilePicker(fileOptions);
-    // @ts-ignore
-    const fileStream: FileSystemWritableFileStream = await fileHandle.createWritable();
-
-    fileStream.write(fileToSave);
-    fileStream.close();
+    exportToJson(getAppState());
   };
 
   const handleLoad = async () => {
-    // @ts-ignore
-    const [fileHandle]: FileSystemFileHandle = await window.showOpenFilePicker(fileOptions);
-    const file: File = await fileHandle.getFile();
-
-    const fileText = await file.text();
-
-    const savedAppState = JSON.parse(fileText) as SavedAppState;
+    const savedAppState = await loadJson<SavedAppState>();
 
     dispatch(reset(savedAppState));
     reactFlowInstance.setViewport(savedAppState.reactFlow.viewport);

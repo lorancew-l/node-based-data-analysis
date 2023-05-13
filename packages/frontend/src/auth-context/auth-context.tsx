@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useRef, useState, useEffect } from 'react';
+import { createContext, useContext, useMemo, useRef } from 'react';
 import { TokenPayload, TokenResponse, User, useRefreshTokens } from '../api';
 import jwtDecode from 'jwt-decode';
 import { useStorageAuth } from './use-storage-auth';
@@ -34,9 +34,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
   const tokens = useRef<TokenResponse>(getTokenFromStorage());
   const pendingTokens = useRef<Promise<TokenResponse>>(null);
 
-  const getUserFromToken = ({ refresh_token }: TokenResponse): User => {
+  const getUserFromToken = (tokens: TokenResponse): User => {
     try {
-      const { exp, email, firstName, lastName, id }: TokenPayload = jwtDecode(refresh_token);
+      const { exp, email, firstName, lastName, id }: TokenPayload = jwtDecode(tokens?.refresh_token);
       const expDate = new Date(exp * 1000);
 
       const isExpired = new Date() > expDate;
@@ -122,18 +122,4 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
   );
 
   return <authContext.Provider value={value}>{children}</authContext.Provider>;
-};
-
-export const useUser = () => {
-  const { subscribeUserUpdate, unsubscribeUserUpdate, getUser } = useAuthContext();
-
-  const [user, setUser] = useState<User>(getUser);
-
-  useEffect(() => {
-    subscribeUserUpdate(setUser);
-
-    return () => unsubscribeUserUpdate(setUser);
-  }, []);
-
-  return user;
 };

@@ -1,16 +1,46 @@
-import { useMemo, useState, useRef, useLayoutEffect } from 'react';
+import { useCallback, useMemo, useState, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link as RRLink } from 'react-router-dom';
-import { Box, Table, TableBody, TableCell, TableContainer, TableRow, Tooltip, Link, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+  Tooltip,
+  Link,
+  CircularProgress,
+  Checkbox,
+  Collapse,
+  Typography,
+  IconButton,
+} from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
 import DownloadIcon from '@mui/icons-material/Download';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { makeStyles } from 'tss-react/mui';
-import { ProjectListItem, useCloneProjectRequest } from '../../api';
+import { ProjectListItem } from '../../api';
 import { useDownloadProject } from '../edit-page/use-download-project';
-import { TableHead, HeadCell, RowActionsTooltip, Pagination } from '../../components';
+import { TableHead, HeadCell, RowActionsTooltip, Pagination } from '../../components/table';
 
 const useStyles = makeStyles()((theme) => ({
+  drawer: {
+    height: 60,
+    width: '100vw',
+    backgroundColor: theme.palette.background.paper,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: theme.spacing(1.5),
+  },
+  drawerWrap: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+  },
   tableContainer: {
     height: '100%',
     position: 'relative',
@@ -23,6 +53,9 @@ const useStyles = makeStyles()((theme) => ({
   },
   row: {
     position: 'relative',
+    '& td': {
+      height: 42,
+    },
   },
   moreIcon: {
     width: 24,
@@ -38,12 +71,6 @@ const useStyles = makeStyles()((theme) => ({
   },
   hiddenBody: {
     visibility: 'hidden',
-  },
-  cell: {
-    height: 43,
-    '&:first-child': {
-      paddingLeft: theme.spacing(2),
-    },
   },
 }));
 
@@ -113,22 +140,26 @@ const headCells: HeadCell<keyof ProjectListItem>[] = [
   },
 ];
 
-type ProjectListTableProps = {
+type UserProjectListTableProps = {
   rows: ProjectListItem[];
   count: number;
   page: number;
   offset: number;
   isLoading: boolean;
+  onCloneProject(id: string): void;
+  onRemoveProject(idList: string[]): Promise<any>;
   onPageChange(page: number): void;
   onOffsetChange(offset: number): void;
 };
 
-export const ProjectListTable: React.FC<ProjectListTableProps> = ({
+export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
+  isLoading,
   rows,
   count,
   page,
   offset,
-  isLoading,
+  onCloneProject,
+  onRemoveProject,
   onPageChange,
   onOffsetChange,
 }) => {
@@ -137,19 +168,23 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
   const navigate = useNavigate();
 
   const downloadProjectById = useDownloadProject();
-  const { cloneProject } = useCloneProjectRequest();
 
   const rowActions = useMemo(
     () => [
       {
         id: 'copy',
         icon: <ContentCopyIcon fontSize="small" />,
-        action: (id: string) => cloneProject(id),
+        action: onCloneProject,
       },
       {
-        id: 'view',
-        icon: <VisibilityIcon fontSize="small" />,
-        action: (id: string) => navigate(`/view/${id}`),
+        id: 'edit',
+        icon: <EditIcon fontSize="small" />,
+        action: (id: string) => navigate(`/edit/${id}`),
+      },
+      {
+        id: 'edit',
+        icon: <DeleteIcon fontSize="small" />,
+        action: (id: string) => onRemoveProject([id]),
       },
       {
         id: 'download',
@@ -173,6 +208,36 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
 
   const sortedRows = useMemo(() => rows.slice().sort(getComparator(order, orderBy)), [order, orderBy, rows]);
 
+  const [selectedRows, setSelectedRows] = useState<ProjectListItem['id'][]>([]);
+
+  const handleSelectRow = (id: ProjectListItem['id']) => () =>
+    setSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(id)) {
+        return prevSelectedRows.filter((rowId) => rowId !== id);
+      }
+
+      return [...prevSelectedRows, id];
+    });
+
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const handleRemoveSelected = async () => {
+    setIsRemoving(true);
+
+    await onRemoveProject(selectedRows);
+
+    setSelectedRows([]);
+    setIsRemoving(false);
+  };
+
+  const handleSelectAll = () => {
+    if (!selectedRows.length) {
+      setSelectedRows(rows.map((row) => row.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
   const paginationRef = useRef<HTMLDivElement>();
 
   const [paginationHeight, setPaginationHeight] = useState(0);
@@ -182,36 +247,59 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
     setPaginationHeight(height);
   }, []);
 
+  console.log(selectedRows, 'tesaf');
+
   return (
     <Box className={classes.tableContainer}>
       {isLoading && <CircularProgress className={classes.loader} />}
 
       <TableContainer style={{ height: `calc(100% - ${paginationHeight}px)` }} className={classes.table}>
         <Table size="medium" stickyHeader className={classes.table}>
-          <TableHead headCells={headCells} order={order} orderBy={orderBy} onSort={handleSort} rowCount={sortedRows.length} />
+          <TableHead
+            selectedCount={selectedRows.length}
+            totalCount={rows.length}
+            onSelectAll={handleSelectAll}
+            headCells={headCells}
+            order={order}
+            orderBy={orderBy}
+            onSort={handleSort}
+            rowCount={sortedRows.length}
+          />
 
           <TableBody className={cx({ [classes.hiddenBody]: isLoading })}>
             {sortedRows.map((row) => (
-              <TableRow className={classes.row} role="checkbox" tabIndex={-1} key={row.id} sx={{ cursor: 'pointer' }} hover>
-                <TableCell className={classes.cell} component="th" scope="row" padding="none">
-                  <Link component={RRLink} to={`/view/${row.id}`} variant="body2">
+              <TableRow
+                className={classes.row}
+                role="checkbox"
+                tabIndex={-1}
+                key={row.id}
+                sx={{ cursor: 'pointer' }}
+                onClick={handleSelectRow(row.id)}
+                hover
+              >
+                <TableCell padding="checkbox">
+                  <Checkbox color="primary" checked={selectedRows.includes(row.id)} />
+                </TableCell>
+
+                <TableCell component="th" scope="row" padding="none">
+                  <Link component={RRLink} to={`/edit/${row.id}`} variant="body2">
                     {row.title}
                   </Link>
                 </TableCell>
 
-                <TableCell className={classes.cell} component="th" scope="row" padding="none">
+                <TableCell component="th" scope="row" padding="none">
                   <LimitedText text={row.description} charCount={50} />
                 </TableCell>
 
-                <TableCell className={classes.cell} component="th" scope="row" padding="none">
+                <TableCell component="th" scope="row" padding="none">
                   {`${row.user.firstName} ${row.user.lastName}`}
                 </TableCell>
 
-                <TableCell className={classes.cell} component="th" scope="row" padding="none">
+                <TableCell component="th" scope="row" padding="none">
                   {new Date(row.created_at).toLocaleDateString()}
                 </TableCell>
 
-                <TableCell className={classes.cell} component="th" scope="row" padding="none">
+                <TableCell component="th" scope="row" padding="none">
                   {new Date(row.updated_at).toLocaleDateString()}
 
                   <span className={classes.moreIcon}>
@@ -247,6 +335,18 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
         onOffsetChange={onOffsetChange}
         offsetOptions={[20, 50, 100]}
       />
+
+      <div className={classes.drawerWrap}>
+        <Collapse in={!!selectedRows.length} timeout={200}>
+          <Paper className={classes.drawer} elevation={2}>
+            <Typography>{`${selectedRows.length || 1} выбрано`}</Typography>
+
+            <IconButton size="small" onClick={handleRemoveSelected}>
+              {isRemoving ? <CircularProgress size={16} /> : <DeleteIcon />}
+            </IconButton>
+          </Paper>
+        </Collapse>
+      </div>
     </Box>
   );
 };

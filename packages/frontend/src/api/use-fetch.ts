@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuthContext } from '../auth-context';
 
 export type UseFetch<T> = {
@@ -10,9 +10,11 @@ export type UseFetch<T> = {
 export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T> = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<T>(null);
 
   const isTriedRefresh = useRef(false);
+
+  const abortController = useRef<AbortController>(null);
 
   const { getToken, refreshTokens } = useAuthContext();
 
@@ -20,8 +22,16 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
     async (input: RequestInfo | URL, init?: RequestInit) => {
       let data: T;
 
+      const controller = new AbortController();
+
       try {
         setIsLoading(true);
+
+        if (abortController.current) {
+          abortController.current.abort();
+        }
+
+        abortController.current = controller;
 
         let token = withAuth ? await getToken() : null;
 
@@ -33,6 +43,7 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
                 ...init?.headers,
                 Authorization: `Bearer ${token}`,
               },
+              signal: abortController.current.signal,
             }),
           });
 
@@ -50,21 +61,30 @@ export const useFetch = <T>({ onSuccess, onError, withAuth = false }: UseFetch<T
         }
 
         isTriedRefresh.current = false;
+        abortController.current = null;
+
         data = await response.json();
 
         onSuccess?.(data);
         setData(data);
       } catch (error) {
+        abortController.current = null;
         onError?.(error);
         setError(error);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
 
       return data;
     },
     [onSuccess, onError],
   );
+
+  useEffect(() => {
+    return () => abortController.current?.abort();
+  }, []);
 
   return { isLoading, isError: !!error, error, data, fetchData };
 };

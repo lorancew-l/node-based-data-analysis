@@ -7,7 +7,7 @@ import { makeStyles } from 'tss-react/mui';
 import { Board } from './board';
 import { Output } from './output';
 import { RendererContextProvider } from './renderer-context';
-import { TopBar } from './top-bar/top-bar';
+import { EditPageTopBar } from './top-bar/top-bar';
 import { AddBlockButton } from './add-block-dialog/add-block-button';
 import { useLoadProject } from './use-load-project';
 import { ReadonlyContextProvider } from './readonly-context';
@@ -68,7 +68,7 @@ const EditPageComponent = () => {
       </Backdrop>
 
       <RendererContextProvider>
-        <TopBar ref={headerRef} />
+        <EditPageTopBar ref={headerRef} />
         <AddBlockButton className={classes.addBlockButton} />
         <Board height={`calc(100vh - ${outputHeight + topBarHeight}px)`} />
         <Output height={outputHeight} setHeight={setOutputHeight} />

@@ -1,29 +1,46 @@
 import { useEffect } from 'react';
+import { useReactFlow } from 'reactflow';
+import { useNavigate } from 'react-router';
 import { useGetProjectRequest } from '../../api';
 import { reset, useAppDispatch } from '../../store';
-import { useReactFlow } from 'reactflow';
 import { setProject } from '../../store/reducers/project';
+import { useAuthContext } from '../../auth-context';
+import { useReadonlyContext } from './readonly-context';
 
 export const useLoadProject = (projectId: string) => {
-  const { isLoading, getProject } = useGetProjectRequest();
+  const { getUser } = useAuthContext();
+  const readonly = useReadonlyContext();
+
+  const { isLoading, getProject } = useGetProjectRequest({
+    onSuccess: (project) => {
+      const { data } = project;
+      const { id: userId } = getUser();
+
+      if (project.userId !== userId && !readonly) {
+        navigate('/403');
+      }
+
+      dispatch(reset(data));
+      dispatch(setProject(project));
+      reactFlowInstance.setViewport(data.reactFlow.viewport);
+    },
+    onError: (error) => {
+      if (error === 403) {
+        navigate('/403');
+      }
+    },
+  });
+
+  const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
-    if (!projectId) {
-      return;
+    if (projectId) {
+      getProject(projectId);
     }
-
-    (async () => {
-      const project = await getProject(projectId);
-      const { data } = project;
-
-      dispatch(reset(data));
-      dispatch(setProject(project));
-      reactFlowInstance.setViewport(data.reactFlow.viewport);
-    })();
   }, [projectId]);
 
   return { isLoading };

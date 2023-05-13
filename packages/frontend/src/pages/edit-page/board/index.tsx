@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import ReactFlow, { Background, Connection, Controls, EdgeChange, NodeChange, MiniMap } from 'reactflow';
 import { useTheme, alpha, lighten } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
@@ -10,6 +10,8 @@ import { selectEdges, selectNodes } from '../../../store/selectors/node-selector
 import { nodeTypes, edgeTypes } from '../node-config';
 import { useRendererContext } from '../renderer-context';
 import { useReadonlyContext } from '../readonly-context';
+import { reset } from '../../../store';
+import { SavedAppState } from '../../../types';
 
 const useStyles = makeStyles<{ height: string | number }>()((theme, { height }) => ({
   container: {
@@ -40,6 +42,11 @@ const readonlyProps = {
   nodesConnectable: false,
 };
 
+const defaultAppState: SavedAppState = {
+  dependencies: {},
+  reactFlow: { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 } },
+};
+
 type BoardProps = {
   height: string | number;
 };
@@ -64,6 +71,12 @@ export const Board: React.FC<BoardProps> = ({ height }) => {
   const handleConnect = useCallback((connection: Connection) => {
     dispatch(connectNodes(connection));
     dispatch(updateDependents(connection.source));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(reset(defaultAppState));
+    };
   }, []);
 
   return (

@@ -1,6 +1,7 @@
-import { Avatar, Paper, Grid, TextField, Button, Typography } from '@mui/material';
+import { Avatar, Paper, Grid, TextField, Button, Typography, Link } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Link as RRLink } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router';
 import { makeStyles } from 'tss-react/mui';
@@ -117,6 +118,10 @@ export const SignInPage = () => {
           >
             Войти
           </Button>
+
+          <Link component={RRLink} to="/signup" variant="body2">
+            Нет аккаунта? Зарегистрируйтесь
+          </Link>
         </Paper>
       </form>
     </div>

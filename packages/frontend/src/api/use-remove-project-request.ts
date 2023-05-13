@@ -2,23 +2,23 @@ import { useCallback } from 'react';
 import { Project } from './types';
 import { useFetch, UseFetch } from './use-fetch';
 
-export const useSaveProjectRequest = (props?: UseFetch<Project>) => {
+export const useRemoveProjectRequest = (props?: UseFetch<Project['id'][]>) => {
   const { fetchData, ...rest } = useFetch({ ...props, withAuth: true });
 
-  const saveProject = useCallback(
-    (project: Project) =>
-      fetchData('/api/project/save', {
+  const removeProject = useCallback(
+    (projectIdList: Project['id'][]) =>
+      fetchData('/api/project/remove', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(project),
+        body: JSON.stringify({ projectIdList }),
       }),
     [],
   );
 
   return {
-    saveProject,
+    removeProject,
     ...rest,
   };
 };
