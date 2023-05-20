@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { Tooltip, IconButton } from '@mui/material';
 import WidgetsIcon from '@mui/icons-material/Widgets';
@@ -12,7 +12,7 @@ import { useUser } from '../../../auth-context';
 import { Project, useSaveProjectRequest } from '../../../api';
 import { SaveProjectDialog } from './save-project-dialog';
 import { useReadonlyContext } from '../readonly-context';
-import { selectProjectId } from '../../../store/selectors/project-selector';
+import { selectProject } from '../../../store/selectors/project-selector';
 import { exportToJson, loadJson } from '../utils';
 import { setProject } from '../../../store/reducers/project';
 
@@ -42,12 +42,15 @@ type FileOptionsProps = {
 export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
   const { classes, cx } = useStyles();
 
+  const inputRef = useRef<HTMLInputElement>();
+  const anchorRef = useRef<HTMLAnchorElement>();
+
   const reactFlowInstance = useReactFlow();
   const store = useAppStore();
 
   const readonly = useReadonlyContext();
 
-  const projectId = useAppSelector(selectProjectId);
+  const { id: projectId, title: projectTitle } = useAppSelector(selectProject) ?? {};
 
   const dispatch = useAppDispatch();
 
@@ -73,14 +76,23 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
   };
 
   const handleExport = async () => {
-    exportToJson(getAppState());
+    const blob = await exportToJson(getAppState());
+    const blobUrl = URL.createObjectURL(blob);
+
+    anchorRef.current.href = blobUrl;
+    anchorRef.current.download = `${projectTitle ?? 'untitled-project'}.nbda`;
+    anchorRef.current.click();
   };
 
   const handleLoad = async () => {
-    const savedAppState = await loadJson<SavedAppState>();
+    inputRef.current.onchange = async ({ target }: Event) => {
+      const [file] = (target as HTMLInputElement).files;
+      const savedAppState = await loadJson<SavedAppState>(file);
 
-    dispatch(reset(savedAppState));
-    reactFlowInstance.setViewport(savedAppState.reactFlow.viewport);
+      dispatch(reset(savedAppState));
+      reactFlowInstance.setViewport(savedAppState.reactFlow.viewport);
+    };
+    inputRef.current.click();
   };
 
   const handleCloseSaveDialog = () => setSaveDialogState(SaveDialogState.Closed);
@@ -147,6 +159,10 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
         onClose={handleCloseSaveDialog}
         onSubmit={handleSave}
       />
+
+      <input accept=".nbda,application/json" style={{ display: 'none' }} type="file" ref={inputRef} />
+
+      <a style={{ display: 'none' }} ref={anchorRef} />
     </>
   );
 };
