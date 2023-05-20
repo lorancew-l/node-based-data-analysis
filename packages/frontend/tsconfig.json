@@ -11,9 +11,15 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "composite": true,
+    "useDefineForClassFields": true,
+    "allowJs": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "Node",
+    "strictNullChecks": false
   },
-  "include": ["src"],
-  "extends": "../../tsconfig.json",
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

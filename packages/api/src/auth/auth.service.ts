@@ -36,7 +36,8 @@ export class AuthService {
           password: hash,
         },
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log('TEST', error);
         throw new EmailConstraintError();
       });
 

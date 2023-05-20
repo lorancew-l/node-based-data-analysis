@@ -5,7 +5,10 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "scripts": {},
+  "scripts": {
+    "build": "yarn prisma generate && nest build",
+    "migrate": "yarn prisma migrate deploy"
+  },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
