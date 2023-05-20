@@ -6,9 +6,10 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DownloadIcon from '@mui/icons-material/Download';
 import { makeStyles } from 'tss-react/mui';
-import { ProjectListItem, useCloneProjectRequest } from '../../api';
+import { ProjectListItem, User, useCloneProjectRequest } from '../../api';
 import { useDownloadProject } from '../edit-page/use-download-project';
 import { TableHead, HeadCell, RowActionsTooltip, Pagination } from '../../components';
+import { orderBy as orderRowsBy } from 'lodash';
 
 const useStyles = makeStyles()((theme) => ({
   tableContainer: {
@@ -66,50 +67,33 @@ const LimitedText: React.FC<LimitedTextProps> = ({ text, charCount }) => {
   );
 };
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
 type Order = 'asc' | 'desc';
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key,
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
-}
 
 const headCells: HeadCell<keyof ProjectListItem>[] = [
   {
     id: 'title',
     label: 'Заголовок',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'description',
     label: 'Описание',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'user',
     label: 'Пользователь',
-    sortable: true,
+    getSortable: (user: User) => `${user.firstName} ${user.lastName}`,
   },
   {
     id: 'created_at',
     label: 'Дата создания',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'updated_at',
     label: 'Дата обновления',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
 ];
 
@@ -171,7 +155,11 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
 
   const emptyRows = offset - rows.length;
 
-  const sortedRows = useMemo(() => rows.slice().sort(getComparator(order, orderBy)), [order, orderBy, rows]);
+  const sortedRows = useMemo(() => {
+    const { getSortable } = headCells.find((it) => it.id === orderBy);
+
+    return orderRowsBy(rows, (row) => getSortable(row[orderBy]), order);
+  }, [order, orderBy, rows]);
 
   const paginationRef = useRef<HTMLDivElement>();
 

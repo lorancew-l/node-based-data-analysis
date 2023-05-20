@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useTheme } from '@mui/material/styles';
-import { CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, ResponsiveContainer } from 'recharts';
+import { CartesianGrid, XAxis, YAxis, BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 const useStyles = makeStyles()((theme) => ({
   container: {

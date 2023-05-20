@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import { NodeData } from '../../../types';
 import { getNodeAllDependencies } from '../../../utils/common';
 import { useReadonlyContext } from '../readonly-context';
-import { isEmpty } from 'lodash';
 
 const useStyles = makeStyles<{ selected: boolean }>()((theme, { selected }) => ({
   container: {

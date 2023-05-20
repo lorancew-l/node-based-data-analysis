@@ -6,7 +6,8 @@ export type SearchProjectQueryParams = {
   page: number;
   offset: number;
   search: string;
-  user: string;
+  user?: string;
+  published?: boolean;
 };
 
 export type SearchProjectResponse = {
@@ -23,7 +24,7 @@ export const useSearchProjectsRequest = (props?: UseFetch<SearchProjectResponse>
     const searchParams = new URLSearchParams();
     Object.entries(query).forEach(([key, value]) => searchParams.set(key, String(value)));
 
-    return fetchData(`/api/project/public-projects?${searchParams.toString()}`);
+    return fetchData(`/api/projects?${searchParams.toString()}`);
   }, []);
 
   return {

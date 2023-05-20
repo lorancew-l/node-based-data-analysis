@@ -89,7 +89,7 @@ export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ i
         </div>
       ) : (
         <div className={classes.dropzoneContainer} {...getRootProps()} onMouseDown={(e) => e.stopPropagation()}>
-          Drop file here
+          Выберите файл
         </div>
       )}
 

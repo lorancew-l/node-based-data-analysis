@@ -7,7 +7,8 @@
     "dev:frontend": "yarn workspace frontend vite",
     "dev:backend": "yarn workspace api nest start --watch",
     "build": "yarn workspace frontend tsc && vite build",
-    "preview": "yarn workspace frontend vite preview"
+    "preview": "yarn workspace frontend vite preview",
+    "app:tsc": "yarn workspace frontend tsc && yarn workspace api tsc"
   },
   "workspaces": [
     "packages/*"

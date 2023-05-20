@@ -56,8 +56,6 @@ export const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
     const pageStartCount = totalCount === 0 ? 0 : (page - 1) * offset + 1;
     const pageEndCount = totalCount === 0 ? 0 : pageStartCount + pageCount - 1;
 
-    console.log('text', pageStartCount, pageCount, pageEndCount);
-
     return (
       <div className={classes.container} ref={ref}>
         <Typography variant="body1">Строк на странице:</Typography>

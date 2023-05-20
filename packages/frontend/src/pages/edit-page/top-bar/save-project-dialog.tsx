@@ -1,10 +1,10 @@
+import { useEffect, useMemo, useRef } from 'react';
 import Dialog from '@mui/material/Dialog/Dialog';
 import DialogContent from '@mui/material/DialogContent/DialogContent';
 import { TextField, FormControlLabel, Checkbox, Avatar, Typography, Button, CircularProgress } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import { useController, useForm } from 'react-hook-form';
 import { makeStyles } from 'tss-react/mui';
-
 import { Project } from '../../../api';
 import { useAppSelector } from '../../../store';
 import { selectProject } from '../../../store/selectors/project-selector';
@@ -51,9 +51,17 @@ type SaveProjectDialogProps = {
 export const SaveProjectDialog: React.FC<SaveProjectDialogProps> = ({ title, isLoading, isOpen, onClose, onSubmit }) => {
   const { classes } = useStyles();
 
+  const previousTitle = useRef<string>('');
+
+  const dialogTitle = useMemo(() => (isOpen ? title : previousTitle.current), [isOpen]);
+
+  useEffect(() => {
+    previousTitle.current = title;
+  }, [isOpen]);
+
   return (
     <Dialog PaperProps={{ className: classes.paper }} open={isOpen} onClose={onClose} keepMounted={false}>
-      <SaveProjectDialogContent title={title} isLoading={isLoading} onSubmit={onSubmit} />
+      <SaveProjectDialogContent title={dialogTitle} isLoading={isLoading} onSubmit={onSubmit} />
     </Dialog>
   );
 };
@@ -107,7 +115,10 @@ const SaveProjectDialogContent: React.FC<SaveProjectDialogContentProps> = ({ tit
 
           <TextField key="test" {...descriptionField} label="Описание" fullWidth multiline />
 
-          <FormControlLabel control={<Checkbox {...publishedField} />} label="Публичный доступ" />
+          <FormControlLabel
+            control={<Checkbox checked={publishedField.value} onChange={publishedField.onChange} />}
+            label="Публичный доступ"
+          />
         </div>
 
         <Button

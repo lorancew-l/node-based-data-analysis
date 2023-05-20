@@ -8,17 +8,9 @@ import TableRow from '@mui/material/TableRow';
 import { useVirtual } from 'react-virtual';
 import { makeStyles } from 'tss-react/mui';
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  Row,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table';
+import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 
-import { NodeIOTableData } from '../../types';
+import { NodeIOTableData } from '../../../types';
 
 const useStyles = makeStyles()((theme) => ({
   header: {

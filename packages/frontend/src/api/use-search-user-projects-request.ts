@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
-import { ProjectListItem } from './types';
-import { useFetch, UseFetch } from './use-fetch';
+import { UseFetch } from './use-fetch';
+import { useSearchProjectsRequest, SearchProjectResponse, SearchProjectQueryParams } from './use-search-projects-request';
+import { useAuthContext } from '../auth-context';
 
 export type SearchUserProjectQueryParams = {
   page: number;
@@ -8,21 +9,21 @@ export type SearchUserProjectQueryParams = {
   search: string;
 };
 
-type SearchUserProjectResponse = {
-  count: number;
-  page: number;
-  offset: number;
-  items: ProjectListItem[];
-};
+export const useSearchUserProjectsRequest = (props?: UseFetch<SearchProjectResponse>) => {
+  const { searchProjects, ...rest } = useSearchProjectsRequest(props);
 
-export const useSearchUserProjectsRequest = (props?: UseFetch<SearchUserProjectResponse>) => {
-  const { fetchData, ...rest } = useFetch({ ...props, withAuth: true });
+  const { getUser } = useAuthContext();
 
   const searchUserProjects = useCallback((query: SearchUserProjectQueryParams) => {
-    const searchParams = new URLSearchParams();
-    Object.entries(query).forEach(([key, value]) => searchParams.set(key, String(value)));
+    const { id: userId } = getUser();
 
-    return fetchData(`/api/project/user-projects?${searchParams.toString()}`);
+    const searchUserQuery: SearchProjectQueryParams = {
+      ...query,
+      user: userId,
+      published: false,
+    };
+
+    return searchProjects(searchUserQuery);
   }, []);
 
   return {

@@ -50,15 +50,6 @@ export const useUserProjectList = () => {
 
   const { removeProject } = useRemoveProjectRequest();
 
-  useLayoutEffect(() => {
-    if (ignoreParamChange.current) {
-      ignoreParamChange.current = false;
-      return;
-    }
-
-    searchUserProjects({ page, offset, search });
-  }, [page, offset, search]);
-
   const operationWithTableRefresh =
     <R, A extends unknown[]>(operation: (...args: A) => Promise<R>) =>
     async (...args: A) => {
@@ -75,6 +66,23 @@ export const useUserProjectList = () => {
   const cloneProjectAndRefresh = useCallback(operationWithTableRefresh(cloneProject), []);
 
   const removeProjectAndRefresh = useCallback(operationWithTableRefresh(removeProject), []);
+
+  useLayoutEffect(() => {
+    if (ignoreParamChange.current) {
+      ignoreParamChange.current = false;
+      return;
+    }
+
+    (async () => {
+      try {
+        setIsLoading(true);
+
+        await searchUserProjects({ page, offset, search });
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [page, offset, search]);
 
   return {
     count,

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { Tooltip, IconButton } from '@mui/material';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import { useReactFlow } from 'reactflow';
-import { omit } from 'lodash';
 import { makeStyles } from 'tss-react/mui';
 
 import { useAppStore, useAppDispatch, reset, useAppSelector } from '../../../store';
@@ -15,6 +14,7 @@ import { SaveProjectDialog } from './save-project-dialog';
 import { useReadonlyContext } from '../readonly-context';
 import { selectProjectId } from '../../../store/selectors/project-selector';
 import { exportToJson, loadJson } from '../utils';
+import { setProject } from '../../../store/reducers/project';
 
 const useStyles = makeStyles()(() => ({
   iconButton: {
@@ -59,7 +59,7 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
     { label: 'Экспортировать', value: FileOption.Export },
     ...(!readonly ? [{ label: 'Загрузить', value: FileOption.Load }] : []),
     ...(user && !readonly ? [{ label: 'Сохранить', value: FileOption.Save }] : []),
-    ...(user && readonly ? [{ label: 'Клонировать', value: FileOption.Clone }] : []),
+    ...(user && projectId ? [{ label: 'Клонировать', value: FileOption.Clone }] : []),
   ];
 
   const getAppState = () => {
@@ -106,21 +106,23 @@ export const FileOptions: React.FC<FileOptionsProps> = ({ className }) => {
 
   const navigate = useNavigate();
 
-  const { saveProject, isLoading } = useSaveProjectRequest({
+  const { saveProject, updateProject, isLoading } = useSaveProjectRequest({
     onSuccess: (project) => {
+      dispatch(setProject(project));
       navigate(`/edit/${project.id}`);
       handleCloseSaveDialog();
     },
   });
 
   const handleSave = (formValues: Pick<Project, 'title' | 'description' | 'published'>) => {
-    let projectToSave: Project = { ...formValues, data: getAppState(), ...(projectId && { id: projectId }) };
+    const projectToSave: Project = { ...formValues, data: getAppState() };
 
-    if (saveDialogState === SaveDialogState.Clone) {
-      projectToSave = omit(projectToSave, 'id');
+    if (!projectId || saveDialogState === SaveDialogState.Clone) {
+      saveProject(projectToSave);
+    } else {
+      updateProject(projectId, projectToSave);
     }
 
-    saveProject(projectToSave);
     handleCloseSaveDialog();
   };
 

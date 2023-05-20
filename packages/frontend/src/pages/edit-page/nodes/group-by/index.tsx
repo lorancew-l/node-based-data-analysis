@@ -8,7 +8,7 @@ type GroupByProps = NodeProps<NodeData<NodeIOTableData, NodeIOObjectData>>;
 
 export const GroupBy: React.FC<GroupByProps> = ({ id, data, ...nodeProps }) => {
   return (
-    <BaseNode id={id} title="Group by" {...nodeProps} input>
+    <BaseNode id={id} title="Группировать" {...nodeProps} input>
       {!!data.input.columns.length ? <GroupByComponent id={id} data={data} /> : null}
     </BaseNode>
   );

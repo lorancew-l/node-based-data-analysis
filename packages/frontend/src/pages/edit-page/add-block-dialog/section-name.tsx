@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 
-import { NodeGroupName } from '../../../components/node-config';
+import { NodeGroupName } from '../node-config';
 
 const useStyles = makeStyles()((theme) => ({
   icon: {

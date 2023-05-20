@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { omit } from 'lodash';
 import { DatabaseService } from 'src/database/database.service';
-import { SaveProjectDto, SearchPublicProjectsDto, SearchUserProjectsDto } from './dto';
-import { ProjectAccessDenied } from './exceptions';
+import { SaveProjectDto, SearchProjectsDto } from './dto';
+import { MissingParameter, ProjectAccessDenied } from './exceptions';
 
 @Injectable()
 export class ProjectService {
   constructor(private databaseService: DatabaseService) {}
 
-  async saveProject(userId: string, project: SaveProjectDto) {
-    const { userId: projectUserId } = (await this.databaseService.project.findFirst({ where: { id: project.id } })) ?? {};
+  async saveProject(userId: string, project: SaveProjectDto, projectId?: string) {
+    const currentProject = await this.databaseService.project.findFirst({ where: { id: projectId } });
+
+    const { userId: projectUserId } = currentProject ?? {};
 
     if (projectUserId && userId !== projectUserId) {
       throw new ProjectAccessDenied();
@@ -18,9 +20,10 @@ export class ProjectService {
 
     return this.databaseService.project.upsert({
       where: {
-        id: project.id ?? 'none',
+        id: projectId ?? 'none',
       },
       update: {
+        ...currentProject,
         ...project,
       },
       create: {
@@ -51,6 +54,15 @@ export class ProjectService {
   }
 
   async removeProject(userId: string, projectIdList: string[]) {
+    const userIdList = await this.databaseService.project.findMany({
+      where: { id: { in: projectIdList } },
+      select: { id: true },
+    });
+
+    if (!userIdList.some(({ id }) => id !== userId)) {
+      throw new ProjectAccessDenied();
+    }
+
     return await this.databaseService.project.deleteMany({
       where: {
         AND: [
@@ -67,12 +79,17 @@ export class ProjectService {
     });
   }
 
-  async searchPublicProjects({ page, offset, user, search }: SearchPublicProjectsDto) {
+  async searchProjects(userId: string, { page, offset, user, search, published = true }: SearchProjectsDto) {
+    if (!published && !user) {
+      throw new MissingParameter('user');
+    }
+
+    if (!published && user && user !== userId) {
+      throw new ProjectAccessDenied();
+    }
+
     const where: Prisma.ProjectWhereInput = {
       AND: [
-        {
-          published: true,
-        },
         {
           title: {
             contains: search,
@@ -80,51 +97,13 @@ export class ProjectService {
           },
         },
         ...(user ? [{ userId: user }] : []),
-      ],
-    };
-
-    const [count, projects] = await this.databaseService.$transaction([
-      this.databaseService.project.count({ where }),
-      this.databaseService.project.findMany({
-        skip: offset * (page - 1),
-        take: offset,
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          created_at: true,
-          updated_at: true,
-          user: {
-            select: {
-              email: true,
-              firstName: true,
-              id: true,
-              lastName: true,
-            },
-          },
-        },
-        where,
-        orderBy: {
-          updated_at: 'desc',
-        },
-      }),
-    ]);
-
-    return { count, page, offset, items: projects };
-  }
-
-  async searchUserProjects(userId: string, { page, offset, search }: SearchUserProjectsDto) {
-    const where: Prisma.ProjectWhereInput = {
-      AND: [
-        {
-          title: {
-            contains: search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          userId,
-        },
+        ...(published
+          ? [
+              {
+                published: true,
+              },
+            ]
+          : []),
       ],
     };
 

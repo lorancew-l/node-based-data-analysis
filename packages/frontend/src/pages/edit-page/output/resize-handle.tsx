@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
@@ -23,13 +22,9 @@ type ResizeHandleProps = {
 };
 
 export const ResizeHandle: React.FC<ResizeHandleProps> = ({ setHeight }) => {
-  const [isDragging, setDragging] = useState<boolean>(false);
-
   const { classes } = useStyles();
 
   const resizeSidebar = () => {
-    setDragging(true);
-
     const continueResize = (event: MouseEvent) => {
       const newHeight = window.innerHeight - event.clientY;
       if (newHeight > MIN_HEIGHT && newHeight < window.innerHeight / 2) {
@@ -38,7 +33,6 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({ setHeight }) => {
     };
 
     const endResize = () => {
-      setDragging(false);
       document.body.removeEventListener('mousemove', continueResize);
       document.body.removeEventListener('mouseup', endResize);
     };

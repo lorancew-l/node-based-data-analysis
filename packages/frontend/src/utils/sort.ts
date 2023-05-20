@@ -1,4 +1,4 @@
-import { NodeIOTableData, SortOrder } from '../types';
+import { SortOrder } from '../types';
 
 const sortNumber = (order: SortOrder) => (a: string, b: string) => {
   const firstNumber = Number(a);

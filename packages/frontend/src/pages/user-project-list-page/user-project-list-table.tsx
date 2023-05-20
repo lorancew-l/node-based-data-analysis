@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useRef, useLayoutEffect } from 'react';
+import { useMemo, useState, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link as RRLink } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { orderBy as orderRowsBy } from 'lodash';
 import { makeStyles } from 'tss-react/mui';
 import { ProjectListItem } from '../../api';
 import { useDownloadProject } from '../edit-page/use-download-project';
@@ -93,50 +94,28 @@ const LimitedText: React.FC<LimitedTextProps> = ({ text, charCount }) => {
   );
 };
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
 type Order = 'asc' | 'desc';
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key,
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
-}
 
 const headCells: HeadCell<keyof ProjectListItem>[] = [
   {
     id: 'title',
     label: 'Заголовок',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'description',
     label: 'Описание',
-    sortable: true,
-  },
-  {
-    id: 'user',
-    label: 'Пользователь',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'created_at',
     label: 'Дата создания',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
   {
     id: 'updated_at',
     label: 'Дата обновления',
-    sortable: true,
+    getSortable: (value: string) => value,
   },
 ];
 
@@ -182,7 +161,7 @@ export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
         action: (id: string) => navigate(`/edit/${id}`),
       },
       {
-        id: 'edit',
+        id: 'delete',
         icon: <DeleteIcon fontSize="small" />,
         action: (id: string) => onRemoveProject([id]),
       },
@@ -206,7 +185,11 @@ export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
 
   const emptyRows = offset - rows.length;
 
-  const sortedRows = useMemo(() => rows.slice().sort(getComparator(order, orderBy)), [order, orderBy, rows]);
+  const sortedRows = useMemo(() => {
+    const { getSortable } = headCells.find((it) => it.id === orderBy);
+
+    return orderRowsBy(rows, (row) => getSortable(row[orderBy]), order);
+  }, [order, orderBy, rows]);
 
   const [selectedRows, setSelectedRows] = useState<ProjectListItem['id'][]>([]);
 
@@ -247,8 +230,6 @@ export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
     setPaginationHeight(height);
   }, []);
 
-  console.log(selectedRows, 'tesaf');
-
   return (
     <Box className={classes.tableContainer}>
       {isLoading && <CircularProgress className={classes.loader} />}
@@ -288,11 +269,7 @@ export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
                 </TableCell>
 
                 <TableCell component="th" scope="row" padding="none">
-                  <LimitedText text={row.description} charCount={50} />
-                </TableCell>
-
-                <TableCell component="th" scope="row" padding="none">
-                  {`${row.user.firstName} ${row.user.lastName}`}
+                  <LimitedText text={row.description} charCount={100} />
                 </TableCell>
 
                 <TableCell component="th" scope="row" padding="none">

@@ -7,12 +7,8 @@ export const useCloneProjectRequest = (props?: UseFetch<Project>) => {
 
   const cloneProject = useCallback(
     (projectId: Project['id']) =>
-      fetchData('/api/project/clone', {
+      fetchData(`/api/projects?sourceId=${projectId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ projectId }),
       }),
     [],
   );

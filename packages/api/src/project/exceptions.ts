@@ -3,3 +3,9 @@ export class ProjectAccessDenied extends Error {
     super('Project access denied');
   }
 }
+
+export class MissingParameter extends Error {
+  constructor(parameter: string) {
+    super(`Missing ${parameter}`);
+  }
+}

@@ -1,7 +1,7 @@
 import { useState, useCallback, useLayoutEffect, useRef } from 'react';
-import { IconButton, Collapse, Paper, Button } from '@mui/material';
+import { IconButton, Collapse, Paper, Link } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link as RRLink } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 import { ProjectListTable } from './project-list-table';
 import { Account, TopBar, SearchField } from '../../components';
@@ -45,6 +45,12 @@ const useStyles = makeStyles()((theme) => ({
   button: {
     height: 40,
   },
+  nav: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+    marginRight: 'auto',
+  },
 }));
 
 export const ProjectListPage = () => {
@@ -76,8 +82,6 @@ export const ProjectListPage = () => {
   const search = searchParams.get('search') || '';
   const user = searchParams.get('user') || '';
 
-  const [userFilter, setUserFilter] = useState<string>(user);
-
   const { searchProjects, isLoading } = useSearchProjectsRequest({
     onSuccess: ({ count, items }) => {
       setRows(items);
@@ -99,10 +103,6 @@ export const ProjectListPage = () => {
 
   const handleFilterButtonClick = () => setIsOpen((prevIsOpen) => !prevIsOpen);
 
-  const handleApplyFilters = () => {
-    handleUserChange(userFilter);
-  };
-
   const topBarRef = useRef<HTMLDivElement>();
   const [topBarHeight, setTopBarHeight] = useState(0);
 
@@ -115,6 +115,16 @@ export const ProjectListPage = () => {
   return (
     <section style={{ height: `calc(100vh - ${topBarHeight}px)` }} className={classes.container}>
       <TopBar className={classes.topBar} ref={topBarRef}>
+        <nav className={classes.nav}>
+          <Link component={RRLink} to={'/edit'} variant="body2">
+            Создать проект
+          </Link>
+
+          <Link component={RRLink} to={'/my-projects'} variant="body2">
+            Мои проекты
+          </Link>
+        </nav>
+
         <IconButton onClick={handleFilterButtonClick}>
           <FilterListIcon fontSize="medium" />
         </IconButton>
@@ -122,11 +132,7 @@ export const ProjectListPage = () => {
         <div className={classes.slideBar}>
           <Collapse in={isOpen}>
             <Paper elevation={5} className={classes.filterList}>
-              <UserAutocompleteField value={userFilter} onChange={setUserFilter} />
-
-              <Button className={classes.button} variant="outlined" size="small" onClick={handleApplyFilters}>
-                Применить
-              </Button>
+              <UserAutocompleteField value={user} onChange={handleUserChange} />
             </Paper>
           </Collapse>
         </div>

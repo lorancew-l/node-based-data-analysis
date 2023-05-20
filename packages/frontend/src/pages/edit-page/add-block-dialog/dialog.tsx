@@ -5,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent/DialogContent';
 import InputIcon from '@mui/icons-material/Input';
 import TransformIcon from '@mui/icons-material/Transform';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import OtherIcon from '@mui/icons-material/MoreHoriz';
 import Grid from '@mui/material/Grid';
 import { TextField, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
@@ -67,6 +68,13 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+const sectionTypeToIcon = {
+  [NodeGroupName.Input]: InputIcon,
+  [NodeGroupName.Transform]: TransformIcon,
+  [NodeGroupName.Visualize]: BarChartIcon,
+  [NodeGroupName.Other]: OtherIcon,
+};
+
 type AddBlockDialogProps = Omit<DialogProps, 'onClose'> & {
   onClose(): void;
 };
@@ -104,28 +112,28 @@ export const AddBlockDialog: React.FC<AddBlockDialogProps> = ({ onClose, ...prop
     <Dialog PaperProps={{ className: classes.paper }} onClose={onClose} {...props}>
       <DialogContent className={classes.container}>
         <div className={classes.sidebar}>
-          <Typography variant="h6">Blocks</Typography>
+          <Typography variant="h6">Блоки</Typography>
 
           <TextField
             className={classes.textField}
             value={searchText}
             onChange={handleSearch}
             size="small"
-            placeholder="Search..."
+            placeholder="Поиск..."
           />
 
           <div className={classes.sectionNameList}>
-            <SectionName name={NodeGroupName.Input} value={selectedGroup} Icon={InputIcon} onClick={handleGroupSelect}>
-              Input
-            </SectionName>
-
-            <SectionName name={NodeGroupName.Transform} value={selectedGroup} Icon={TransformIcon} onClick={handleGroupSelect}>
-              Transform
-            </SectionName>
-
-            <SectionName name={NodeGroupName.Visualize} value={selectedGroup} Icon={BarChartIcon} onClick={handleGroupSelect}>
-              Visualize
-            </SectionName>
+            {Object.entries(nodeGroupNameToTitle).map(([nodeGroupName, sectionTitle]) => (
+              <SectionName
+                key={nodeGroupName}
+                name={nodeGroupName as NodeGroupName}
+                value={selectedGroup}
+                Icon={sectionTypeToIcon[nodeGroupName as NodeGroupName]}
+                onClick={handleGroupSelect}
+              >
+                {sectionTitle}
+              </SectionName>
+            ))}
           </div>
         </div>
 

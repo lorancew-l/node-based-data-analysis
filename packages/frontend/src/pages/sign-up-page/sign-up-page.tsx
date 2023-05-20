@@ -90,7 +90,6 @@ export const SignUpPage = () => {
                 label="Имя"
                 required
                 fullWidth
-                autoFocus
               />
             </Grid>
 

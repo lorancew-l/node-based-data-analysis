@@ -1,8 +1,8 @@
-import { Card, CardContent, TextField, Typography } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { NodeType } from '../../../types';
 
-import { NodeConfigItem } from '../../../components/node-config';
+import { NodeConfigItem } from '../node-config';
 
 const useStyles = makeStyles()((theme) => ({
   card: {
@@ -57,8 +57,8 @@ export const NodeCard: React.FC<NodeCardProps> = ({ title, description, input, o
         </div>
 
         <div>
-          <Typography className={classes.inputOutputInfo} color="action.disabled">{`Input: ${input.join()}`}</Typography>
-          <Typography className={classes.inputOutputInfo} color="action.disabled">{`Output: ${output.join()}`}</Typography>
+          <Typography className={classes.inputOutputInfo} color="action.disabled">{`Вход: ${input.join(', ')}`}</Typography>
+          <Typography className={classes.inputOutputInfo} color="action.disabled">{`Выход: ${output.join(', ')}`}</Typography>
         </div>
       </CardContent>
     </Card>

@@ -11,7 +11,7 @@ export type Order = 'asc' | 'desc';
 export type HeadCell<T> = {
   id: T;
   label: string;
-  sortable: boolean;
+  getSortable(value: any): string | number;
 };
 
 type TableHeadProps<T> = {
@@ -47,7 +47,7 @@ export const TableHead = <T extends string>({
           <TableCell padding="checkbox">
             <Checkbox
               color="primary"
-              checked={selectedCount === totalCount}
+              checked={!!selectedCount && selectedCount === totalCount}
               indeterminate={selectedCount > 0 && selectedCount < totalCount}
               onChange={onSelectAll}
             />
@@ -63,8 +63,8 @@ export const TableHead = <T extends string>({
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
-              hideSortIcon={!headCell.sortable}
-              active={headCell.sortable && orderBy === headCell.id}
+              hideSortIcon={!headCell.getSortable}
+              active={!!headCell.getSortable && orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : 'asc'}
               onClick={handleSort(headCell.id)}
             >

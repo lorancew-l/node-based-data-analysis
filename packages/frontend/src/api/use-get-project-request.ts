@@ -5,7 +5,7 @@ import { useFetch, UseFetch } from './use-fetch';
 export const useGetProjectRequest = (props?: UseFetch<Project>) => {
   const { fetchData, ...rest } = useFetch<Required<Project>>({ ...props, withAuth: true });
 
-  const getProject = useCallback((projectId: Project['id']) => fetchData(`/api/project/get?projectId=${projectId}`), []);
+  const getProject = useCallback((projectId: Project['id']) => fetchData(`/api/projects/${projectId}`), []);
 
   return {
     getProject,

@@ -48,7 +48,7 @@ export const GroupByComponent: React.FC<GroupByComponentProps> = memo(({ id, dat
 
   return (
     <div className={classes.container}>
-      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
+      <Select label="Колонка" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
     </div>
   );
 });

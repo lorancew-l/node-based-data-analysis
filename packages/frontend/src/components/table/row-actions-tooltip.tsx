@@ -22,6 +22,7 @@ const useStyles = makeStyles()((theme) => ({
   tooltip: {
     padding: theme.spacing(0, 0.5),
     borderRadius: theme.shape.borderRadius,
+    backgroundColor: 'rgb(97,97,97)',
     margin: 0,
     '&&&': {
       marginRight: theme.spacing(0.5),
@@ -53,7 +54,14 @@ export const RowActionsTooltip: React.FC<RowActionsTooltipProps> = ({ id, action
       title={
         <span className={classes.container}>
           {actions.map((action) => (
-            <MenuItem className={classes.menuItem} key={action.id} onClick={() => action.action(id)}>
+            <MenuItem
+              className={classes.menuItem}
+              key={action.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                action.action(id);
+              }}
+            >
               {action.icon}
             </MenuItem>
           ))}

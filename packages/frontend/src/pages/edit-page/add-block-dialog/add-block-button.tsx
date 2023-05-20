@@ -36,7 +36,7 @@ export const AddBlockButton: React.FC<AddBlockButtonProps> = ({ className }) => 
   return (
     <>
       <Button variant="outlined" className={cx(classes.button, className)} onClick={handleDialogOpen} disabled={readonly}>
-        + block
+        + Блок
       </Button>
 
       <AddBlockDialog open={isDialogOpen} onClose={handleDialogClose} />

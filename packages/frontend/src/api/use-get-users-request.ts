@@ -5,7 +5,7 @@ import { User } from './types';
 export const useGetUsersRequest = (props?: UseFetch<User[]>) => {
   const { fetchData, data, ...rest } = useFetch<User[]>({ ...props, withAuth: true });
 
-  const getUsers = useCallback(() => fetchData(`/api/user/user-list`), []);
+  const getUsers = useCallback(() => fetchData('/api/users'), []);
 
   return {
     getUsers,

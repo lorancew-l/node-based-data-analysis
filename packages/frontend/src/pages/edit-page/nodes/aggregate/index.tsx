@@ -9,7 +9,7 @@ type AggregateProps = NodeProps<NodeData<NodeIOObjectData, NodeIOObjectData>>;
 
 export const Aggregate: React.FC<AggregateProps> = ({ id, data, ...nodeProps }) => {
   return (
-    <BaseNode id={id} title="Aggregate" {...nodeProps} input>
+    <BaseNode id={id} title="Агрегировать" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <AggregateComponent id={id} data={data} /> : null}
     </BaseNode>
   );
