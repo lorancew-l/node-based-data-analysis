@@ -9,7 +9,7 @@ type SortProps = NodeProps<NodeData<NodeIOObjectData, NodeIOObjectData>>;
 
 export const Sort: React.FC<SortProps> = ({ id, data, ...nodeProps }) => {
   return (
-    <BaseNode id={id} title="Sort" {...nodeProps} input>
+    <BaseNode id={id} title="Сортировать" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <SortComponent id={id} data={data} /> : null}
     </BaseNode>
   );

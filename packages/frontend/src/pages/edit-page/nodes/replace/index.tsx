@@ -18,7 +18,7 @@ export const Replace: React.FC<ReplaceProps> = ({ id, data, ...nodeProps }) => {
   const { classes } = useStyles();
 
   return (
-    <BaseNode className={classes.container} id={id} title="Replace" {...nodeProps} input>
+    <BaseNode className={classes.container} id={id} title="Заменить" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <ReplaceComponent id={id} data={data} /> : null}
     </BaseNode>
   );

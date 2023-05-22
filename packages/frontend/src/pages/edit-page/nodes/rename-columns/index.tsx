@@ -17,7 +17,7 @@ type RenameColumnsProps = NodeProps<NodeData<NodeIOTableData, NodeIOTableData>>;
 export const RenameColumns: React.FC<RenameColumnsProps> = ({ id, data, ...nodeProps }) => {
   const { classes } = useStyles();
   return (
-    <BaseNode className={classes.container} id={id} title="Rename columns" {...nodeProps} input>
+    <BaseNode className={classes.container} id={id} title="Переименовать колонки" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <RenameColumnsComponent id={id} data={data} /> : null}
     </BaseNode>
   );

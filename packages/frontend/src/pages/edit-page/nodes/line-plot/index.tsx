@@ -27,7 +27,7 @@ export const LinePlot: React.FC<LinePlotProps> = ({ id, data, ...nodeProps }) =>
   const hasData = !!columns.length;
 
   return (
-    <BaseNode id={id} title="Line plot" {...nodeProps} input>
+    <BaseNode id={id} title="Линейный график" {...nodeProps} input>
       {hasData ? (
         <div className={classes.container}>{isTableData(input) ? <TablePlot data={input} /> : <ObjectPlot data={input} />}</div>
       ) : null}

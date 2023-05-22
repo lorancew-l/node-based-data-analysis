@@ -269,7 +269,7 @@ export const UserProjectListTable: React.FC<UserProjectListTableProps> = ({
                 </TableCell>
 
                 <TableCell component="th" scope="row" padding="none">
-                  <LimitedText text={row.description} charCount={100} />
+                  <LimitedText text={row.description} charCount={70} />
                 </TableCell>
 
                 <TableCell component="th" scope="row" padding="none">

@@ -10,7 +10,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({ id, data, ...nodeProps
   const { input } = data;
 
   return (
-    <BaseNode id={id} title="Scatter plot" {...nodeProps} input>
+    <BaseNode id={id} title="Диаграмма рассеяния" {...nodeProps} input>
       {!!input?.columns?.length ? <Plot data={data} /> : null}
     </BaseNode>
   );

@@ -17,7 +17,7 @@ type DropColumnsProps = NodeProps<NodeData<NodeIOObjectData, NodeIOObjectData>>;
 export const DropColumns: React.FC<DropColumnsProps> = ({ id, data, ...nodeProps }) => {
   const { classes } = useStyles();
   return (
-    <BaseNode className={classes.container} id={id} title="Drop columns" {...nodeProps} input>
+    <BaseNode className={classes.container} id={id} title="Удалить колонки" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <DropColumnsComponent id={id} data={data} /> : null}
     </BaseNode>
   );
