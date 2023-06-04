@@ -13,6 +13,8 @@ import {
   LinePlot,
   Sort,
   Replace,
+  HistPlot,
+  PieChart,
 } from './nodes';
 import { NodeEdge } from './edge';
 
@@ -30,6 +32,8 @@ export const nodeTypes = {
   [NodeType.LinePlot]: LinePlot,
   [NodeType.Sort]: Sort,
   [NodeType.Replace]: Replace,
+  [NodeType.HistPlot]: HistPlot,
+  [NodeType.PieChart]: PieChart,
 };
 
 export const edgeTypes = {
@@ -163,5 +167,21 @@ export const nodeConfig: NodeConfigItem[] = [
     description: 'Отображает пользовательский текст',
     input: ['-'],
     output: ['-'],
+  },
+  {
+    type: NodeType.HistPlot,
+    group: NodeGroupName.Visualize,
+    title: 'Гистограмма',
+    description: 'Строит гистограмму по выбранной колонке',
+    input: ['Таблица'],
+    output: ['Таблица'],
+  },
+  {
+    type: NodeType.PieChart,
+    group: NodeGroupName.Visualize,
+    title: 'Круговая диаграмма',
+    description: 'Строит круговую диаграмму',
+    input: ['Объект'],
+    output: ['Объект'],
   },
 ];

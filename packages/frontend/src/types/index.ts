@@ -14,6 +14,8 @@ export enum NodeType {
   LinePlot = 'linePlot',
   Sort = 'sort',
   Replace = 'replace',
+  HistPlot = 'histPlot',
+  PieChart = 'PieChart',
 }
 
 export type NodeIOObjectData<T extends object = object> = {

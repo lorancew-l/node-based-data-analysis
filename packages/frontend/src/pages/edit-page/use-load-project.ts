@@ -3,7 +3,7 @@ import { useReactFlow } from 'reactflow';
 import { useNavigate } from 'react-router';
 import { useGetProjectRequest } from '../../api';
 import { reset, useAppDispatch } from '../../store';
-import { setProject } from '../../store/reducers/project';
+import { clearProject, setProject } from '../../store/reducers/project';
 import { useAuthContext } from '../../auth-context';
 import { useReadonlyContext } from './readonly-context';
 
@@ -40,6 +40,8 @@ export const useLoadProject = (projectId: string) => {
   useEffect(() => {
     if (projectId) {
       getProject(projectId);
+    } else {
+      dispatch(clearProject());
     }
   }, [projectId]);
 

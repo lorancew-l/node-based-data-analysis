@@ -28,7 +28,15 @@ export const boardSlice = createSlice({
       state.nodes.push(node);
     },
     removeNode: (state, action: PayloadAction<string>) => {
-      state.nodes = state.nodes.filter((node) => node.id !== action.payload);
+      const removedNodeId = action.payload;
+
+      state.nodes = state.nodes.filter((node) => node.id !== removedNodeId);
+      delete state.dependencies[removedNodeId];
+
+      state.dependencies = Object.entries(state.dependencies).reduce<Dependencies>((result, [nodeId, dependencies]) => {
+        result[nodeId] = dependencies.filter((dependency) => dependency !== removedNodeId);
+        return result;
+      }, {});
     },
     updateNodes: (state, action: PayloadAction<NodeChange[]>) => {
       state.nodes = applyNodeChanges(action.payload, state.nodes) as BoardNode[];
@@ -81,6 +89,8 @@ export const boardSlice = createSlice({
 
         dependencies.forEach((dependency) => {
           const dependedNode = state.nodes.find(({ id }) => id === dependency) as BoardNode;
+
+          console.log('parent', source, 'dependency', dependency, 'nodes', [state.nodes.map(({ id }) => id)]);
 
           dependedNode.data.input = output;
           dependedNode.data.output = transformNodeData(dependedNode.type, dependedNode.data.input, dependedNode.data.params);

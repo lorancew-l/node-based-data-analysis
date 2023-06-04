@@ -54,13 +54,15 @@ export const FileLoaderComponent: React.FC<FileLoaderComponentProps> = memo(({ i
 
     fileReader.readAsText(file);
     fileReader.onload = () => {
-      const { data } = parse<string[]>(fileReader.result as string);
+      const { data } = parse<string[]>(fileReader.result as string, { skipEmptyLines: true });
       const [columns, ...rows] = data;
 
       const tableData = {
         columns,
         data: rows,
       };
+
+      console.log(tableData);
 
       dispatch(updateNodeById({ id, data: { input: tableData, params: { fileName: file.name } } }));
       dispatch(updateDependents(id));

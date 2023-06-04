@@ -42,7 +42,6 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         id,
         position,
         type: NodeType.ScatterPlot,
-
         data: {
           inputType: [IOType.Table],
           outputType: [IOType.Table],
@@ -188,6 +187,32 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
           input: { columns: [], data: [] },
           output: { columns: [], data: [] },
           params: {},
+        },
+      };
+    case NodeType.HistPlot:
+      return {
+        id,
+        position,
+        type: NodeType.HistPlot,
+        data: {
+          inputType: [IOType.Table],
+          outputType: [IOType.Table],
+          input: { columns: [], data: [] },
+          output: { columns: [], data: [] },
+          params: {},
+        },
+      };
+    case NodeType.PieChart:
+      return {
+        id,
+        position,
+        type: NodeType.PieChart,
+        data: {
+          inputType: [IOType.Object],
+          outputType: [IOType.Object],
+          params: {},
+          input: { columns: [], data: [] },
+          output: { columns: [], data: [] },
         },
       };
     default:

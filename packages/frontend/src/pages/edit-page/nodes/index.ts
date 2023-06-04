@@ -11,3 +11,5 @@ export { Filter } from './filter';
 export { LinePlot } from './line-plot';
 export { Sort } from './sort';
 export { Replace } from './replace';
+export { HistPlot } from './hist-plot';
+export { PieChart } from './pie-chart';

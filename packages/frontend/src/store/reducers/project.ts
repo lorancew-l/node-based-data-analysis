@@ -18,8 +18,11 @@ export const projectSlice = createSlice({
     setProject: (state, action: PayloadAction<Project>) => {
       state.project = omit(action.payload, 'data');
     },
+    clearProject: (state) => {
+      state.project = null;
+    },
   },
 });
 
 export const projectReducer = projectSlice.reducer;
-export const { setProject } = projectSlice.actions;
+export const { setProject, clearProject } = projectSlice.actions;

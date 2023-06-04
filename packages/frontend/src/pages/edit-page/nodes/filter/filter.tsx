@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { TextField, Button } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 
@@ -33,44 +33,41 @@ export const FilterComponent: React.FC<FilterComponentProps> = memo(({ id, data 
   const { input, params } = data;
   const { columns } = input;
 
-  const [selectedColumn, setSelectedColumn] = useState<number>(params.column ?? 0);
-  const [selectedFilter, setSelectedFilter] = useState<Filter>(params.filter ?? Filter.Equal);
-  const [pattern, setPattern] = useState<string>(params.pattern ?? '');
+  const { column = 0, filter: filter = Filter.Equal, pattern = '' } = params;
 
   const columnsOptions = columns.map((column, index) => ({ value: index, label: column }));
 
-  const columnDataType = useMemo(() => getColumnDataType(input.data, selectedColumn), [selectedColumn]);
+  const columnDataType = useMemo(() => getColumnDataType(input.data, column), [column]);
 
   const filterOptions = dataTypeToOptions[columnDataType];
 
-  const handlePatternChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setPattern(value);
-  };
-
-  const handleApply = () => {
+  const handleParameterChange = (parameter: 'column' | 'filter' | 'pattern', value: any) => {
     dispatch(
       updateNodeById({
         id,
         data: {
-          params: { column: selectedColumn, filter: selectedFilter, pattern },
+          params: { column, filter, pattern, [parameter]: value },
         },
       }),
     );
     dispatch(updateDependents(id));
   };
 
+  const handleColumnChange = (column: number) => handleParameterChange('column', column);
+
+  const handleFilterChange = (filter: string) => handleParameterChange('filter', filter);
+
+  const handlePatternChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleParameterChange('pattern', event.target.value);
+  };
+
   return (
     <div className={cx(classes.container, 'nodrag')}>
-      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} disabled={readonly} />
+      <Select label="Column" value={column} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Condition" value={selectedFilter} onChange={setSelectedFilter} options={filterOptions} disabled={readonly} />
+      <Select label="Condition" value={filter} onChange={handleFilterChange} options={filterOptions} disabled={readonly} />
 
-      {selectedFilter !== Filter.NotEmpty && <TextField value={pattern} onChange={handlePatternChange} disabled={readonly} />}
-
-      <Button onClick={handleApply} disabled={readonly}>
-        Apply
-      </Button>
+      {filter !== Filter.NotEmpty && <TextField value={pattern} onChange={handlePatternChange} disabled={readonly} />}
     </div>
   );
 });

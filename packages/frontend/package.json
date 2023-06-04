@@ -19,6 +19,7 @@
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-google-charts": "^4.0.0",
     "react-hook-form": "^7.43.9",
     "react-markdown": "^8.0.5",
     "react-redux": "^8.0.5",
