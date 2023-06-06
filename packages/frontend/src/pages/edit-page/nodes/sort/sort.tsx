@@ -64,7 +64,7 @@ export const SortComponent: React.FC<SortComponentProps> = memo(({ id, data }) =
 
   return (
     <div className={classes.container}>
-      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
+      <Select label="Колонка" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
       <Select label="Order" value={selectedOrder} onChange={handleOrderChange} options={sortOrderOptions} disabled={readonly} />
     </div>

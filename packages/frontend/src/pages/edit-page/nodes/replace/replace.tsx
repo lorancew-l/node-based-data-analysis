@@ -65,10 +65,10 @@ export const ReplaceComponent: React.FC<ReplaceComponentProps> = memo(({ id, dat
 
   return (
     <div className={cx(classes.container, 'nodrag')}>
-      <Select label="Column" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} disabled={readonly} />
+      <Select label="Колонка" value={selectedColumn} onChange={setSelectedColumn} options={columnsOptions} disabled={readonly} />
 
       <Select
-        label="Condition"
+        label="Условие"
         value={replaceCondition}
         onChange={setReplaceCondition}
         options={replaceConditionOptions}

@@ -8,7 +8,7 @@ import { RenameColumnsComponent } from './rename-columns';
 
 const useStyles = makeStyles()(() => ({
   container: {
-    width: 300,
+    maxWidth: 350,
   },
 }));
 

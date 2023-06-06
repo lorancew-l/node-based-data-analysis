@@ -4,13 +4,14 @@ import { omit } from 'lodash';
 import { DatabaseService } from 'src/database/database.service';
 import { SaveProjectDto, SearchProjectsDto } from './dto';
 import { MissingParameter, ProjectAccessDenied } from './exceptions';
+import { resolve } from 'path';
 
 @Injectable()
 export class ProjectService {
   constructor(private databaseService: DatabaseService) {}
 
   async saveProject(userId: string, project: SaveProjectDto, projectId?: string) {
-    const currentProject = await this.databaseService.project.findFirst({ where: { id: projectId } });
+    const currentProject = !projectId ? null : await this.databaseService.project.findFirst({ where: { id: projectId } });
 
     const { userId: projectUserId } = currentProject ?? {};
 

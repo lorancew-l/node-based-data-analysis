@@ -43,6 +43,7 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         position,
         type: NodeType.ScatterPlot,
         data: {
+          params: {},
           inputType: [IOType.Table],
           outputType: [IOType.Table],
           input: { columns: [], data: [] },
@@ -57,6 +58,7 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         data: {
           inputType: [IOType.Object],
           outputType: [IOType.Object],
+          params: {},
           input: { columns: [], data: {} },
           output: { columns: [], data: {} },
         },
@@ -134,6 +136,8 @@ export const createNode = (nodeType: NodeType, position: BoardNode['position'] =
         data: {
           inputType: [],
           outputType: [],
+          input: { columns: [], data: [] },
+          output: { columns: [], data: [] },
           params: { markdown: '' },
         },
       };
@@ -255,11 +259,11 @@ const transformAggregation = (
 
   const AggregateFunction = aggregationNameToFunction[func];
 
-  const output = Object.entries(data).reduce((result, [key, array]) => {
+  const output = Object.entries(data).reduce<Record<string, number | null>>((result, [key, array]) => {
     result[key] = AggregateFunction(arrayToNumber(array.map((value) => value[column]))) ?? null;
 
     return result;
-  }, {} as Record<string, number>);
+  }, {});
 
   return {
     columns,
@@ -267,9 +271,18 @@ const transformAggregation = (
   };
 };
 
-const transformRenameColumns = (data: NodeIOTableData, { columns }: { columns: string[] }) => {
+const transformRenameColumns = (
+  data: NodeIOTableData,
+  { renamedColumns }: { renamedColumns?: { newName: string; originalName: string }[] } = {},
+) => {
+  const newColumns = data?.columns?.map((column) => {
+    const newColumn = renamedColumns?.find(({ originalName }) => originalName === column);
+
+    return newColumn?.newName ? newColumn.newName : column;
+  });
+
   return {
-    columns: columns ?? data.columns,
+    columns: newColumns,
     data: data.data,
   };
 };

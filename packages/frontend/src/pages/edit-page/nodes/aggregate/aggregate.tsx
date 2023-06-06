@@ -66,10 +66,10 @@ export const AggregateComponent: React.FC<AggregateComponentProps> = memo(({ id,
 
   return (
     <div className={classes.container}>
-      <Select label="Column" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
+      <Select label="Колонка" value={selectedColumn} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
       <Select
-        label="Function"
+        label="Функция"
         value={selectedFunction}
         onChange={handleFunctionChange}
         options={aggregateFunctionOptions}

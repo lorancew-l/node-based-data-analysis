@@ -36,9 +36,9 @@ export enum IOType {
 export type NodeIOData = NodeIOObjectData | NodeIOTableData;
 
 export type NodeData<Input extends NodeIOData = NodeIOData, Output extends NodeIOData = NodeIOData> = {
-  input?: Input;
-  output?: Output;
-  params?: any;
+  input: Input;
+  output: Output;
+  params: any;
   inputType: IOType[];
   outputType: IOType[];
 };

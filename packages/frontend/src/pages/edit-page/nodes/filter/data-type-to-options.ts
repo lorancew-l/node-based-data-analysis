@@ -28,29 +28,29 @@ export const dataTypeToOptions = {
     },
     {
       value: Filter.NotEmpty,
-      label: 'Not empty or NaN',
+      label: 'Не пустое или NaN',
     },
   ],
   [DataType.String]: [
     {
       value: Filter.Equal,
-      label: 'Text equal',
+      label: 'Текст равен',
     },
     {
       value: Filter.NotIncludes,
-      label: 'Text is not equal',
+      label: 'Текст не равен',
     },
     {
       value: Filter.Includes,
-      label: 'Text includes',
+      label: 'Текст включает',
     },
     {
       value: Filter.NotIncludes,
-      label: 'Text does not includes',
+      label: 'Текст не включает',
     },
     {
       value: Filter.NotEmpty,
-      label: 'Is not empty',
+      label: 'Не пустое',
     },
   ],
 };

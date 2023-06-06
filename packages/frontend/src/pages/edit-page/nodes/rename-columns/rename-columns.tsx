@@ -1,6 +1,7 @@
-import { memo, useState, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { TextField, Button } from '@mui/material';
+import { TextField, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { makeStyles } from 'tss-react/mui';
 
 import { useAppDispatch, updateDependents, updateNodeById } from '../../../../store';
@@ -46,55 +47,50 @@ export const RenameColumnsComponent: React.FC<RenameColumnsComponentProps> = mem
   const dispatch = useAppDispatch();
 
   const { columns } = data.input;
+  const { renamedColumns = [] }: { renamedColumns: RenameColumnValue[] } = data.params;
 
-  const [renamedColumns, setRenamedColumns] = useState<RenameColumnValue[]>([{ originalName: columns[0], newName: '' }]);
-  const [pickedColumns, setPickedColumns] = useState<string[]>([columns[0]]);
+  const pickedColumns = useMemo(() => renamedColumns.map(({ originalName }) => originalName), [renamedColumns]);
 
   const columnOptions = useMemo(() => columns.map((column) => ({ value: column, label: column })), [columns]);
 
+  const handleColumnsChange = (renamedColumns: RenameColumnValue[]) => {
+    dispatch(
+      updateNodeById({
+        id,
+        data: {
+          params: { renamedColumns },
+        },
+      }),
+    );
+    dispatch(updateDependents(id));
+  };
+
   const handleColumnSelect = (index: number) => (column: string) => {
-    const { originalName: currentColumn } = renamedColumns[index];
+    const newRenamedColumns = cloneDeep(renamedColumns);
+    newRenamedColumns[index].originalName = column;
 
-    setPickedColumns((prevColumns) => [...prevColumns.filter((column) => column !== currentColumn), column]);
-    setRenamedColumns((prevRenamedColumns) => {
-      const newRenamedColumns = cloneDeep(prevRenamedColumns);
-      prevRenamedColumns[index].originalName = column;
-
-      return newRenamedColumns;
-    });
+    handleColumnsChange(newRenamedColumns);
   };
 
   const handleNewColumnNameChange = (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
 
-    setRenamedColumns((prevRenamedColumns) => {
-      const newRenamedColumns = cloneDeep(prevRenamedColumns);
-      newRenamedColumns[index].newName = value;
+    const newRenamedColumns = cloneDeep(renamedColumns);
+    newRenamedColumns[index].newName = value;
 
-      return newRenamedColumns;
-    });
+    handleColumnsChange(newRenamedColumns);
   };
 
   const handleAddColumn = () => {
-    setRenamedColumns((prevRenamedColumns) => [...prevRenamedColumns, { originalName: '', newName: '' }]);
+    const newRenamedColumns = cloneDeep(renamedColumns);
+    newRenamedColumns.push({ originalName: '', newName: '' });
+
+    handleColumnsChange(newRenamedColumns);
   };
 
-  const handleApply = () => {
-    const newColumns = columns.map((column) => {
-      const newColumn = renamedColumns.find(({ originalName }) => originalName === column);
-
-      return newColumn?.newName ? newColumn.newName : column;
-    });
-
-    dispatch(
-      updateNodeById({
-        id,
-        data: {
-          params: { columns: newColumns },
-        },
-      }),
-    );
-    dispatch(updateDependents(id));
+  const handleRemoveColumn = (columnIndex: number) => () => {
+    const newRenamedColumns = cloneDeep(renamedColumns).filter((_, index) => index !== columnIndex);
+    handleColumnsChange(newRenamedColumns);
   };
 
   return (
@@ -118,6 +114,10 @@ export const RenameColumnsComponent: React.FC<RenameColumnsComponentProps> = mem
             disabled={readonly}
             fullWidth
           />
+
+          <IconButton size="small" onClick={handleRemoveColumn(index)}>
+            <DeleteIcon />
+          </IconButton>
         </div>
       ))}
 
@@ -126,12 +126,8 @@ export const RenameColumnsComponent: React.FC<RenameColumnsComponentProps> = mem
         onClick={handleAddColumn}
         disabled={readonly || renamedColumns.length === columns.length}
       >
-        + add column
+        + колонка
       </button>
-
-      <Button onClick={handleApply} disabled={readonly}>
-        Apply
-      </Button>
     </div>
   );
 });

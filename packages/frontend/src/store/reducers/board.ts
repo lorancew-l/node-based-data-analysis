@@ -1,20 +1,53 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { applyNodeChanges, NodeChange, Edge, EdgeChange, applyEdgeChanges, Connection, addEdge } from 'reactflow';
 import { v4 as makeId } from 'uuid';
+import { cloneDeep } from 'lodash';
 
 import { BoardNode, Dependencies, SavedAppState } from '../../types';
 import { createNode, transformNodeData } from '../../utils/node';
 
-type BoadrdState = {
+type BoardState = {
   nodes: BoardNode[];
   edges: Edge[];
   dependencies: Dependencies;
 };
 
-const initialState: BoadrdState = {
+const initialState: BoardState = {
   nodes: [],
   edges: [],
   dependencies: {},
+};
+
+const updateNodeDependents = ({
+  source,
+  nodes,
+  dependencies,
+}: {
+  source: string;
+  nodes: BoardNode[];
+  dependencies: Dependencies;
+}) => {
+  const newNodes = cloneDeep(nodes);
+
+  const update = (source: string) => {
+    const { data } = newNodes.find(({ id }) => id === source) as BoardNode;
+    const { output } = data;
+
+    const sourceDependencies = dependencies[source] ?? [];
+
+    sourceDependencies.forEach((dependency) => {
+      const dependedNode = newNodes.find(({ id }) => id === dependency) as BoardNode;
+
+      dependedNode.data.input = output;
+      dependedNode.data.output = transformNodeData(dependedNode.type, dependedNode.data.input, dependedNode.data.params);
+
+      update(dependedNode.id);
+    });
+  };
+
+  update(source);
+
+  return newNodes;
 };
 
 export const boardSlice = createSlice({
@@ -28,11 +61,24 @@ export const boardSlice = createSlice({
       state.nodes.push(node);
     },
     removeNode: (state, action: PayloadAction<string>) => {
+      const { dependencies, nodes } = state;
       const removedNodeId = action.payload;
 
-      state.nodes = state.nodes.filter((node) => node.id !== removedNodeId);
-      delete state.dependencies[removedNodeId];
+      let newNodes = cloneDeep(nodes);
+      const removedNode = newNodes.find(({ id }) => id === removedNodeId);
 
+      if (!removedNode) {
+        return;
+      }
+
+      const { input, output } = createNode(removedNode.type).data;
+      removedNode.data = { ...removedNode.data, input, output, params: {} };
+
+      newNodes = updateNodeDependents({ source: removedNodeId, nodes: newNodes, dependencies });
+      newNodes = newNodes.filter((node) => node.id !== removedNodeId);
+
+      delete state.dependencies[removedNodeId];
+      state.nodes = newNodes;
       state.dependencies = Object.entries(state.dependencies).reduce<Dependencies>((result, [nodeId, dependencies]) => {
         result[nodeId] = dependencies.filter((dependency) => dependency !== removedNodeId);
         return result;
@@ -71,6 +117,10 @@ export const boardSlice = createSlice({
     resetNodeData: (state, action: PayloadAction<BoardNode['id']>) => {
       const node = state.nodes.find(({ id }) => id === action.payload);
 
+      if (!node) {
+        return;
+      }
+
       const { input, output } = createNode(node.type).data;
       node.data = { ...node.data, input, output, params: {} };
     },
@@ -81,25 +131,9 @@ export const boardSlice = createSlice({
         return;
       }
 
-      const update = (source: string) => {
-        const { data } = state.nodes.find(({ id }) => id === source) as BoardNode;
-        const { output } = data;
+      const { nodes, dependencies } = state;
 
-        const dependencies = state.dependencies[source] ?? [];
-
-        dependencies.forEach((dependency) => {
-          const dependedNode = state.nodes.find(({ id }) => id === dependency) as BoardNode;
-
-          console.log('parent', source, 'dependency', dependency, 'nodes', [state.nodes.map(({ id }) => id)]);
-
-          dependedNode.data.input = output;
-          dependedNode.data.output = transformNodeData(dependedNode.type, dependedNode.data.input, dependedNode.data.params);
-
-          update(dependedNode.id);
-        });
-      };
-
-      update(source);
+      state.nodes = updateNodeDependents({ source, nodes, dependencies });
     },
     reset: (state, action: PayloadAction<SavedAppState>) => {
       const { dependencies, reactFlow } = action.payload;

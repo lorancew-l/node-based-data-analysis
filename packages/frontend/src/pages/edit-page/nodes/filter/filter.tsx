@@ -63,9 +63,9 @@ export const FilterComponent: React.FC<FilterComponentProps> = memo(({ id, data 
 
   return (
     <div className={cx(classes.container, 'nodrag')}>
-      <Select label="Column" value={column} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
+      <Select label="Колонка" value={column} onChange={handleColumnChange} options={columnsOptions} disabled={readonly} />
 
-      <Select label="Condition" value={filter} onChange={handleFilterChange} options={filterOptions} disabled={readonly} />
+      <Select label="Условие" value={filter} onChange={handleFilterChange} options={filterOptions} disabled={readonly} />
 
       {filter !== Filter.NotEmpty && <TextField value={pattern} onChange={handlePatternChange} disabled={readonly} />}
     </div>

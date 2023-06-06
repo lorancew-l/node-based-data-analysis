@@ -18,7 +18,7 @@ export const Stats: React.FC<StatsProps> = ({ id, data, ...nodeProps }) => {
   const { classes } = useStyles();
 
   return (
-    <BaseNode className={classes.container} id={id} title="Stats" {...nodeProps} input>
+    <BaseNode className={classes.container} id={id} title="Статистика" {...nodeProps} input>
       {!isEmpty(data.input.data) ? <StatsComponent id={id} data={data} /> : null}
     </BaseNode>
   );
